@@ -75,14 +75,16 @@ void move_player(SDL_Renderer *renderer, Player *player) {
 void render_player_view(SDL_Renderer *renderer, Player *player) {
 
 
-    float current_angle = player->angle - FOV / 2;
+    float current_angle = player->angle + FOV / 2;
 
     float angle_increment = FOV / (float) SCREEN_WIDTH;
 
     for (int current_column = 1; current_column <= SCREEN_WIDTH;
          current_column++) {
 
-        float distance = distance_to_wall(player->x, player->y, current_angle);
+        float raw_distance = distance_to_wall(player->x, player->y, current_angle);
+
+        float distance = raw_distance * cos(player->angle - current_angle);
 
         float height = SCREEN_HEIGHT * 50 / distance;
 
@@ -97,7 +99,7 @@ void render_player_view(SDL_Renderer *renderer, Player *player) {
         SDL_SetRenderDrawColor(renderer, 0x28, 0x2c, 0x34, 0xff);
         SDL_RenderDrawRectF(renderer, &rect);
 
-        current_angle += angle_increment;
+        current_angle -= angle_increment;
     }
 
 }

@@ -94,19 +94,8 @@ void render_player_view(SDL_Renderer *renderer, Player *player) {
         rect.w = 1;
         rect.h = height;
 
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xff, 0xff);
+        SDL_SetRenderDrawColor(renderer, 0x28, 0x2c, 0x34, 0xff);
         SDL_RenderDrawRectF(renderer, &rect);
-
-        rect.y = rect.y + height;
-        rect.h = SCREEN_HEIGHT - rect.y;
-        SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
-        SDL_RenderDrawRectF(renderer, &rect);
-
-        rect.y = 0;
-        rect.h = mid_y;
-        SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
-        SDL_RenderDrawRectF(renderer, &rect);
-
 
         current_angle += angle_increment;
     }

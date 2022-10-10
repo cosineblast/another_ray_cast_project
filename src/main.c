@@ -11,12 +11,19 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "map.h"
 #include "player.h"
 #include "timing.h"
 
 
 
 int main() {
+
+
+  Map *map = new_sample_map();
+
+  Player player;
+  init_sample_player(&player);
 
   SDL_Init(SDL_INIT_VIDEO);
 
@@ -30,8 +37,6 @@ int main() {
 
   SDL_ShowWindow(window);
 
-  Player player;
-  init_sample_player(&player);
 
   SDL_Event event;
 
@@ -55,11 +60,16 @@ int main() {
 
     SDL_RenderClear(renderer);
 
-    render_player(renderer, &player);
+    render_player(renderer, &player, map);
 
     SDL_RenderPresent(renderer);
   }
 
+  free_map(map);
+
+  SDL_DestroyRenderer(renderer);
+
+  SDL_DestroyWindow(window);
 
   SDL_Quit();
 

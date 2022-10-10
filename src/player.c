@@ -2,10 +2,11 @@
 #include "player.h"
 #include <SDL2/SDL_rect.h>
 #include <math.h>
+#include "map.h"
 #include "timing.h"
 #include <stdbool.h>
 
-float distance_to_wall(float x, float y, float angle);
+float distance_to_wall(float x, float y, float angle, Map *map);
 
 void init_sample_player(Player *player) {
   player->x = 100;
@@ -72,8 +73,7 @@ void move_player(SDL_Renderer *renderer, Player *player) {
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
-void render_player_view(SDL_Renderer *renderer, Player *player) {
-
+static void render_player_view(SDL_Renderer *renderer, Player *player, Map *map) {
 
     float current_angle = player->angle + FOV / 2;
 
@@ -82,7 +82,7 @@ void render_player_view(SDL_Renderer *renderer, Player *player) {
     for (int current_column = 1; current_column <= SCREEN_WIDTH;
          current_column++) {
 
-        float raw_distance = distance_to_wall(player->x, player->y, current_angle);
+        float raw_distance = distance_to_wall(player->x, player->y, current_angle, map);
 
         float distance = raw_distance * cos(player->angle - current_angle);
 
@@ -109,7 +109,7 @@ static bool point_in_bounds(float x, float y) {
         y >= 0 && y <= SCREEN_HEIGHT;
 }
 
-float distance_to_wall(float initial_x, float initial_y, float angle) {
+float distance_to_wall(float initial_x, float initial_y, float angle, Map *map) {
 
     float const increment_unit = 1;
 
@@ -120,7 +120,7 @@ float distance_to_wall(float initial_x, float initial_y, float angle) {
 
     float x = initial_x, y = initial_y;
 
-    while (point_in_bounds(x, y)) {
+    while (point_is_walkable(map, (SDL_FPoint){x,y})) {
         total_distance += increment_unit;
         x += increment_x;
         y -= increment_y;
@@ -130,6 +130,6 @@ float distance_to_wall(float initial_x, float initial_y, float angle) {
 }
 
 
-void render_player(SDL_Renderer *renderer, Player *player) {
-    render_player_view(renderer, player);
+void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
+    render_player_view(renderer, player, map);
 }

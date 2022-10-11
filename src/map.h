@@ -2,7 +2,7 @@
 #pragma once
 
 #include <stdint.h>
-#define TILE_SIZE 128
+#define TILE_SIZE 64
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>

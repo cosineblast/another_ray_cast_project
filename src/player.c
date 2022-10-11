@@ -213,7 +213,38 @@ void render_vertical_boundaries(SDL_Renderer *renderer, Player *player) {
 
 }
 
+void render_map(SDL_Renderer *renderer, Map *map) {
+
+  int y = 0;
+  int x = 0;
+
+  SDL_FRect rect;
+  rect.w = TILE_SIZE;
+  rect.h = TILE_SIZE;
+
+  for (int row = 0; row < map->rows && y < SCREEN_HEIGHT; row++) {
+    for (int col = 0; col < map->cols && x < SCREEN_HEIGHT; col++) {
+
+      int8_t tile = map->tiles[row * map->cols + col];
+
+      if (tile > 0) {
+        rect.x = x;
+        rect.y = y;
+        SDL_SetRenderDrawColor(renderer, 0x28, 0x2C, 0x34, 0xff);
+        SDL_RenderFillRectF(renderer, &rect);
+      }
+
+      x += TILE_SIZE;
+    }
+    x = 0;
+    y += TILE_SIZE;
+  }
+
+}
+
 void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
+
+  render_map(renderer, map);
 
   render_grid(renderer);
   render_player2d(renderer, player);

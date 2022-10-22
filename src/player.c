@@ -16,6 +16,10 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
+
+#define HORIZONTAL 0
+#define VERTICAL 1
+
 void init_sample_player(Player *player) {
   player->x = 150;
   player->y = 250;
@@ -166,6 +170,14 @@ void find_vertical_boundary(
 }
 
 typedef struct {
+  SDL_FPoint hit_point;
+  SDL_FPoint inside_point;
+  int8_t tile;
+  int is_vertical;
+  float distance;
+} CastResult;
+
+typedef struct {
   SDL_FPoint result_point;
   SDL_FPoint inside_point;
   int8_t tile;
@@ -283,6 +295,11 @@ void render_map(SDL_Renderer *renderer, Map *map) {
   }
 }
 
+
+void render_hit_texture(SDL_Renderer *renderer, Map *map, Player *player,
+                        SideCastResult *horizontal_result,
+                        SideCastResult *vertical_result);
+
 void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
 
 
@@ -299,21 +316,50 @@ void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
 
   SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 
-  SideCastResult result;
+  SideCastResult horizontal_result,
+    vertical_result;
 
-  render_boundaries(renderer, map, player, 0, &result);
+  render_boundaries(renderer, map, player, HORIZONTAL, &horizontal_result);
 
   SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x0, 0xff);
 
-  render_dot(renderer, result.result_point);
+  render_dot(renderer, horizontal_result.result_point);
 
   SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
 
-  render_boundaries(renderer, map, player, 1, &result);
+  render_boundaries(renderer, map, player, VERTICAL, &vertical_result);
 
   SDL_SetRenderDrawColor(renderer, 0x0, 0xff, 0xff, 0xff);
 
-  render_dot(renderer, result.result_point);
+  render_dot(renderer, vertical_result.result_point);
 
   #endif
+
+}
+
+static float point_distance(SDL_FPoint first, SDL_FPoint second) {
+
+  FVec2 vector = point_difference(&first, &second);
+
+  return vec_norm(&vector);
+
+}
+
+static void find_cast_result(SideCastResult results[2], SDL_FPoint start_point,
+                             CastResult *output) {
+
+  float distances[2];
+
+  for (size_t i = 0; i < 2; i++) {
+    distances[i] = point_distance(start_point, results[i].result_point);
+  }
+
+
+  size_t shortest_index =
+    distances[HORIZONTAL] < distances[VERTICAL] ? HORIZONTAL : VERTICAL;
+
+  output->distance = distances[shortest_index];
+  output->hit_point = results[shortest_index].result_point;
+  output->inside_point = results[shortest_index].inside_point;
+  output->is_vertical = shortest_index == VERTICAL;
 }

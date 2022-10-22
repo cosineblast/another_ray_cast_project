@@ -83,14 +83,14 @@ void find_horizontal_boundary(
 }
 
 static void full_side_cast(Map *map,
-                      const SDL_FPoint *start_point,
-                      const FVec2 *advancement,
-                      const FVec2 *lookup_displacement,
+                      const SDL_FPoint start_point,
+                      const FVec2 advancement,
+                      const FVec2 lookup_displacement,
                       SideCastResult *result,
                       BoundaryCallback *callback
                       ) {
 
-  SDL_FPoint current_point = *start_point;
+  SDL_FPoint current_point = start_point;
 
   SDL_FPoint inside_block;
 
@@ -144,17 +144,13 @@ void cast_side(Map *map, SDL_FPoint source_point, int is_vertical, float angle,
     find_horizontal_displacement(angle, &displacement);
   }
 
-  full_side_cast(map, &start_point, &advancement, &displacement, result,
+  full_side_cast(map, start_point, advancement, displacement, result,
                  callback);
 }
 
 
 static float point_distance(SDL_FPoint first, SDL_FPoint second) {
-
-  FVec2 vector = point_difference(&first, &second);
-
-  return vec_norm(&vector);
-
+  return vec_norm(point_difference(first, second));
 }
 
 void cast_result_from_sides(SideCastResult results[2], SDL_FPoint source_point,

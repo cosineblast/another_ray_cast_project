@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 3.0)
 
 project(rcast)
 
-add_executable(main src/main.c src/timing.c src/player.c src/map.c src/view.c src/vec.c)
+add_executable(main
+  src/main.c
+  src/timing.c
+  src/player.c
+  src/map.c
+  src/view.c
+  src/vec.c
+  src/preview.c)
 
 
 target_link_libraries(main SDL2)

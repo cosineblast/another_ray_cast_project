@@ -1,5 +1,7 @@
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_rect.h>
@@ -20,12 +22,10 @@
 int main() {
 
 
-  Map *map = new_sample_map();
-
-  Player player;
-  init_sample_player(&player);
-
   SDL_Init(SDL_INIT_VIDEO);
+
+  IMG_Init(IMG_INIT_PNG);
+
 
   SDL_Window *window =
       SDL_CreateWindow("hi there", SDL_WINDOWPOS_CENTERED,
@@ -36,6 +36,11 @@ int main() {
                        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
   SDL_ShowWindow(window);
+
+  Map *map = new_sample_map(renderer);
+
+  Player player;
+  init_sample_player(&player);
 
 
   SDL_Event event;
@@ -70,6 +75,8 @@ int main() {
   SDL_DestroyRenderer(renderer);
 
   SDL_DestroyWindow(window);
+
+  IMG_Quit();
 
   SDL_Quit();
 

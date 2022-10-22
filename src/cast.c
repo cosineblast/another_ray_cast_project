@@ -166,16 +166,14 @@ void find_cast_result(SideCastResult results[2], SDL_FPoint source_point,
     distances[i] = point_distance(source_point, results[i].result_point);
   }
 
-
   size_t shortest_index =
-    distances[HORIZONTAL] < distances[VERTICAL] ? HORIZONTAL : VERTICAL;
+      distances[HORIZONTAL] < distances[VERTICAL] ? HORIZONTAL : VERTICAL;
 
   output->distance = distances[shortest_index];
   output->hit_point = results[shortest_index].result_point;
   output->inside_point = results[shortest_index].inside_point;
   output->is_vertical = shortest_index == VERTICAL;
 }
-
 
 void full_cast(Map *map, SDL_FPoint source_point, float angle,
                CastResult *output) {

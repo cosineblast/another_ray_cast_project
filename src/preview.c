@@ -4,6 +4,8 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
+#include "map.h"
 #include "vec.h"
 #include "cast.h"
 
@@ -176,9 +178,23 @@ static void render_boundaries(SDL_Renderer *renderer,
             &callback);
 }
 
-static void render_cast_texture() {
 
+static void draw_result_line(
+    SDL_Renderer *renderer,
+    Player *player,
+    CastResult *cast_result) {
 
+  SDL_Color colors[2] = {{0xff, 0x88, 0xff, 0xff}, {0xff, 0xff, 0x88, 0xff}
+
+  };
+
+  SDL_Color line_color = colors[cast_result->is_vertical];
+
+  SDL_SetRenderDrawColor(renderer, line_color.r, line_color.g, line_color.b,
+                         line_color.a);
+
+  SDL_RenderDrawLineF(renderer, player->x, player->y, cast_result->hit_point.x,
+                      cast_result->hit_point.y);
 }
 
 static void utilize_side_casts(
@@ -192,25 +208,7 @@ static void utilize_side_casts(
                    (SDL_FPoint){player->x, player->y},
                    &cast_result);
 
-  SDL_Color colors[2] = {
-  {0xff, 0x88, 0xff, 0xff},
-  {0xff, 0xff, 0x88, 0xff}
+  draw_result_line(renderer, player, &cast_result);
 
-};
-
-  SDL_Color line_color =
-    colors[cast_result.is_vertical];
-
-  SDL_SetRenderDrawColor(
-    renderer,
-    line_color.r, line_color.g, line_color.b,
-    line_color.a);
-
-  SDL_RenderDrawLineF(
-    renderer,
-    player->x,
-    player->y,
-    cast_result.hit_point.x,
-    cast_result.hit_point.y);
 
 }

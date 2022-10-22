@@ -16,4 +16,12 @@ add_executable(main
 
 target_link_libraries(main SDL2)
 
+target_link_libraries(main SDL2_image)
+
 target_link_libraries(main m)
+
+set(CMAKE_C_FLAGS "-Wall")
+
+file(
+  COPY assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+  )

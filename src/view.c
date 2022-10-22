@@ -1,14 +1,14 @@
 #include "view.h"
 
-#include <stdint.h>
-#include <math.h>
 #include <assert.h>
+#include <math.h>
+#include <stdint.h>
 
 typedef struct {
   float distance;
   int8_t tile_value;
   SDL_FPoint touch_point;
-}RayCastResult ;
+} RayCastResult;
 
 void get_tile_color(int8_t tile, SDL_Color *color);
 
@@ -53,8 +53,6 @@ void render_player_view(SDL_Renderer *renderer, Player *player, Map *map) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_RenderDrawRectF(renderer, &rectangle);
 
-
-
     current_angle -= angle_increment;
   }
 }
@@ -67,54 +65,49 @@ void get_tile_color(int8_t tile, SDL_Color *color) {
 
   if (tile == -1) {
     *color = (SDL_Color){0xff, 0xff, 0xff, 0xff};
-  }
-  else {
+  } else {
     static const SDL_Color colors[] = {
-      [1] = {0x28, 0x2c, 0x34, 0xff},
-      [2] = {0xf7, 0x81, 0xA9, 0xff}
-    };
+        [1] = {0x28, 0x2c, 0x34, 0xff}, [2] = {0xf7, 0x81, 0xA9, 0xff}};
 
     *color = colors[tile];
   }
 }
 
-
 static bool point_in_bounds(float x, float y) {
-    return x >= 0 && x <= SCREEN_WIDTH &&
-        y >= 0 && y <= SCREEN_HEIGHT;
+  return x >= 0 && x <= SCREEN_WIDTH && y >= 0 && y <= SCREEN_HEIGHT;
 }
 
 void cast_ray(float initial_x, float initial_y, float angle, Map *map,
               RayCastResult *result) {
 
-    float const increment_unit = 1;
+  float const increment_unit = 1;
 
-    float const increment_x = increment_unit * cosf(angle);
-    float const increment_y = increment_unit * sinf(angle);
+  float const increment_x = increment_unit * cosf(angle);
+  float const increment_y = increment_unit * sinf(angle);
 
-    float total_distance = 0;
+  float total_distance = 0;
 
-    SDL_FPoint point = {initial_x, initial_y};
+  SDL_FPoint point = {initial_x, initial_y};
 
-    for (;;) {
+  for (;;) {
 
-      if (fabsf(point.x) > 1000 || fabs(point.y) > 1000) {
-        result->tile_value = -1;
-        break;
-      }
-
-      int8_t tile = find_intersecting_wall(map, point);
-
-      if (tile > 0) {
-        result->tile_value = tile;
-        break;
-      }
-
-      point.x += increment_x;
-      point.y -= increment_y;
-          total_distance += increment_unit;
+    if (fabsf(point.x) > 1000 || fabs(point.y) > 1000) {
+      result->tile_value = -1;
+      break;
     }
 
-    result->touch_point = point;
-    result->distance = total_distance;
+    int8_t tile = find_intersecting_wall(map, point);
+
+    if (tile > 0) {
+      result->tile_value = tile;
+      break;
+    }
+
+    point.x += increment_x;
+    point.y -= increment_y;
+    total_distance += increment_unit;
+  }
+
+  result->touch_point = point;
+  result->distance = total_distance;
 }

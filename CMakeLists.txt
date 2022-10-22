@@ -10,7 +10,8 @@ add_executable(main
   src/map.c
   src/view.c
   src/vec.c
-  src/preview.c)
+  src/preview.c
+  src/cast.c)
 
 
 target_link_libraries(main SDL2)

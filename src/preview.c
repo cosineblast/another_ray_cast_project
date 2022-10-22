@@ -1,35 +1,20 @@
 #include "preview.h"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include "vec.h"
+#include "cast.h"
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
-
-#define HORIZONTAL 0
-#define VERTICAL 1
-
-typedef struct {
-  SDL_FPoint hit_point;
-  SDL_FPoint inside_point;
-  int8_t tile;
-  int is_vertical;
-  float distance;
-} CastResult;
-
-typedef struct {
-  SDL_FPoint result_point;
-  SDL_FPoint inside_point;
-  int8_t tile;
-} SideCastResult;
-
 
 static void render_map(SDL_Renderer *renderer, Map *map);
 static void render_grid(SDL_Renderer *renderer);
 static void render_player2d(SDL_Renderer *renderer, Player *player);
 static void render_player_arrow(SDL_Renderer *renderer, Player *player);
 static void render_dot(SDL_Renderer *renderer, SDL_FPoint f);
-static float point_distance(SDL_FPoint first, SDL_FPoint second);
 
 static void render_boundaries(SDL_Renderer *renderer,
                                   Map *map, Player *player,
@@ -37,34 +22,43 @@ static void render_boundaries(SDL_Renderer *renderer,
                        SideCastResult *result);
 
 
+
+static void utilize_side_casts(
+  SDL_Renderer *renderer, Map *map,
+  Player *player,
+  SideCastResult results[2]);
+
+
 void render_player_preview(SDL_Renderer *renderer, Player *player, Map *map) {
-
-
-
 
   render_map(renderer, map);
 
   render_grid(renderer);
+
   render_player2d(renderer, player);
 
   SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 
-  SideCastResult horizontal_result,
-    vertical_result;
+  SideCastResult results[2],
+    *horizontal_result = &results[HORIZONTAL],
+    *vertical_result = &results[VERTICAL];
 
-  render_boundaries(renderer, map, player, HORIZONTAL, &horizontal_result);
+
+  render_boundaries(renderer, map, player, HORIZONTAL, horizontal_result);
 
   SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x0, 0xff);
 
-  render_dot(renderer, horizontal_result.result_point);
+  render_dot(renderer, horizontal_result->result_point);
 
   SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
 
-  render_boundaries(renderer, map, player, VERTICAL, &vertical_result);
+  render_boundaries(renderer, map, player, VERTICAL, vertical_result);
 
   SDL_SetRenderDrawColor(renderer, 0x0, 0xff, 0xff, 0xff);
 
-  render_dot(renderer, vertical_result.result_point);
+  render_dot(renderer, vertical_result->result_point);
+
+  utilize_side_casts(renderer, map, player, results);
 
 }
 
@@ -112,149 +106,21 @@ static void render_grid(SDL_Renderer *renderer) {
 
 }
 
+static void render_player2d(SDL_Renderer *renderer, Player *player) {
 
+  render_player_arrow(renderer, player);
 
-static void find_cast_result(SideCastResult results[2], SDL_FPoint start_point,
-                             CastResult *output) {
+  SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x00, 0xff);
 
-  float distances[2];
+  SDL_FRect rectangle = {player->x, player->y, 10, 10};
 
-  for (size_t i = 0; i < 2; i++) {
-    distances[i] = point_distance(start_point, results[i].result_point);
-  }
+  rectangle.x -= rectangle.w / 2;
+  rectangle.y -= rectangle.h / 2;
 
-
-  size_t shortest_index =
-    distances[HORIZONTAL] < distances[VERTICAL] ? HORIZONTAL : VERTICAL;
-
-  output->distance = distances[shortest_index];
-  output->hit_point = results[shortest_index].result_point;
-  output->inside_point = results[shortest_index].inside_point;
-  output->is_vertical = shortest_index == VERTICAL;
-}
-
-void find_horizontal_boundary(
-  SDL_FPoint point,
-  float angle,
-  SDL_FPoint *result,
-  FVec2 * boundary_distance) {
-
-
-  float cotangent = 1 / (tanf(angle));
-  float sine = sinf(angle);
-
-  boundary_distance->y = copysignf(TILE_SIZE, sine);
-  boundary_distance->x = boundary_distance->y * cotangent;
-
-  float height = (float) ((int)(point.y) % 64);
-
-  float y = point.y - height;
-
-  float base = height * cotangent;
-
-  float x = point.x + base;
-
-  if (sine < 0) {
-    y = y - boundary_distance->y;
-    x = x + boundary_distance->x;
-  }
-
-  result->x = x;
-  result->y = y;
-
-  boundary_distance->y *= -1;
-}
-
-void find_vertical_boundary(
-  SDL_FPoint point,
-  float angle,
-  SDL_FPoint *result,
-  FVec2 * boundary_distance) {
-
-  float tangent = tanf(angle);
-  float cosine = cosf(angle);
-
-  boundary_distance->x = copysignf(TILE_SIZE, cosine);
-  boundary_distance->y = boundary_distance->x * tangent;
-
-  float width = (float) ((int)(point.x) % 64);
-
-  float x = point.x - width;
-
-  float top = width * tangent;
-
-  float y = point.y + top;
-
-  if (cosine > 0) {
-    y = y - boundary_distance->y;
-    x = x + boundary_distance->x;
-  }
-
-  result->x = x;
-  result->y = y;
-
-  boundary_distance->y *= -1;
-}
-
-void cast_boundaries(SDL_Renderer *renderer,
-                      Map *map,
-                      const SDL_FPoint *start_point,
-                      const FVec2 *advancement,
-                      const FVec2 *lookup_displacement,
-                      SideCastResult *result
-                      ) {
-
-  SDL_FPoint current_point = *start_point;
-
-  SDL_FPoint inside_block;
-
-  for (;;) {
-
-    inside_block = current_point;
-
-    point_add(&inside_block, lookup_displacement);
-
-    int8_t tile = find_intersecting_wall(map, inside_block);
-
-    if (tile != 0) {
-      result->tile = tile;
-      break;
-    }
-
-    if (current_point.x < 0 || current_point.x > SCREEN_WIDTH ||
-         current_point.y < 0 || current_point.y > SCREEN_HEIGHT) {
-      result->tile = -1;
-      break;
-    }
-
-    render_dot(renderer, current_point);
-
-    point_add(&current_point, advancement);
-  }
-
-  result->inside_point = inside_block;
-  result->result_point = current_point;
-}
-
-void find_horizontal_displacement(float angle, FVec2 *displacement) {
-  displacement->x = 0;
-  displacement->y = -copysignf(TILE_SIZE/2.0, sinf(angle));
-}
-
-void find_vertical_displacement(float angle, FVec2 *displacement) {
-  displacement->x = copysignf(TILE_SIZE/2.0, cosf(angle));
-  displacement->y = 0;
+  SDL_RenderFillRectF(renderer, &rectangle);
 }
 
 
-
-static float point_distance(SDL_FPoint first, SDL_FPoint second) {
-
-  FVec2 vector = point_difference(&first, &second);
-
-  return vec_norm(&vector);
-
-}
 
 static void render_player_arrow(SDL_Renderer *renderer, Player *player) {
 
@@ -286,18 +152,12 @@ static void render_dot(SDL_Renderer *renderer, SDL_FPoint f) {
 }
 
 
-static void render_player2d(SDL_Renderer *renderer, Player *player) {
 
-  render_player_arrow(renderer, player);
 
-  SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x00, 0xff);
+static void on_boundary_callback(SDL_FPoint *boundary_point, void *data) {
+  SDL_Renderer *renderer = data;
 
-  SDL_FRect rectangle = {player->x, player->y, 10, 10};
-
-  rectangle.x -= rectangle.w / 2;
-  rectangle.y -= rectangle.h / 2;
-
-  SDL_RenderFillRectF(renderer, &rectangle);
+  render_dot(renderer, *boundary_point);
 }
 
 static void render_boundaries(SDL_Renderer *renderer,
@@ -305,31 +165,52 @@ static void render_boundaries(SDL_Renderer *renderer,
                                   int is_vertical,
                        SideCastResult *result) {
 
-  SDL_FPoint start_point;
 
-  FVec2 advancement;
+  BoundaryCallback callback = {on_boundary_callback, renderer};
 
-  FVec2 displacement;
+  side_cast(map,
+            (SDL_FPoint){player->x, player->y},
+            is_vertical,
+            player->angle,
+            result,
+            &callback);
+}
 
-  if (is_vertical) {
-    find_vertical_boundary((SDL_FPoint){player->x, player->y}, player->angle,
-                            &start_point, &advancement);
+static void render_cast_texture() {
 
-    find_vertical_displacement(player->angle, &displacement);
-  }
-  else {
-    find_horizontal_boundary((SDL_FPoint){player->x, player->y}, player->angle,
-                            &start_point, &advancement);
 
-    find_horizontal_displacement(player->angle, &displacement);
-  }
+}
 
-  cast_boundaries(
+static void utilize_side_casts(
+  SDL_Renderer *renderer, Map *map,
+  Player *player,
+  SideCastResult side_results[2]) {
+
+  CastResult cast_result;
+
+  find_cast_result(side_results,
+                   (SDL_FPoint){player->x, player->y},
+                   &cast_result);
+
+  SDL_Color colors[2] = {
+  {0xff, 0x88, 0xff, 0xff},
+  {0xff, 0xff, 0x88, 0xff}
+
+};
+
+  SDL_Color line_color =
+    colors[cast_result.is_vertical];
+
+  SDL_SetRenderDrawColor(
     renderer,
-    map,
-    &start_point,
-    &advancement,
-    &displacement,
-    result
-  );
+    line_color.r, line_color.g, line_color.b,
+    line_color.a);
+
+  SDL_RenderDrawLineF(
+    renderer,
+    player->x,
+    player->y,
+    cast_result.hit_point.x,
+    cast_result.hit_point.y);
+
 }

@@ -1,6 +1,6 @@
 
 #pragma once
 
-void update_time();
+void timing_update_time();
 
-extern const float time_variation;
+extern const float timing_time_variation;

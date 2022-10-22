@@ -37,10 +37,10 @@ int main() {
 
   SDL_ShowWindow(window);
 
-  Map *map = new_sample_map(renderer);
+  Map *map = map_new_sample(renderer);
 
   Player player;
-  init_sample_player(&player);
+  player_init_sample(&player);
 
 
   SDL_Event event;
@@ -57,20 +57,20 @@ int main() {
 
     }
 
-    update_time();
+    timing_update_time();
 
-    move_player(renderer, &player);
+    player_move(renderer, &player);
 
     SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
 
     SDL_RenderClear(renderer);
 
-    render_player(renderer, &player, map);
+    player_render(renderer, &player, map);
 
     SDL_RenderPresent(renderer);
   }
 
-  free_map(map);
+  map_free(map);
 
   SDL_DestroyRenderer(renderer);
 

@@ -8,7 +8,7 @@
 #define SCREEN_HEIGHT 480
 
 
-void find_vertical_boundary(
+static void find_vertical_boundary(
   SDL_FPoint point,
   float angle,
   SDL_FPoint *result,
@@ -39,12 +39,12 @@ void find_vertical_boundary(
   boundary_distance->y *= -1;
 }
 
-void find_horizontal_displacement(float angle, FVec2 *displacement) {
+static void find_horizontal_displacement(float angle, FVec2 *displacement) {
   displacement->x = 0;
   displacement->y = -copysignf(TILE_SIZE/2.0, sinf(angle));
 }
 
-void find_vertical_displacement(float angle, FVec2 *displacement) {
+static void find_vertical_displacement(float angle, FVec2 *displacement) {
   displacement->x = copysignf(TILE_SIZE/2.0, cosf(angle));
   displacement->y = 0;
 }
@@ -82,7 +82,7 @@ void find_horizontal_boundary(
   boundary_distance->y *= -1;
 }
 
-void full_side_cast(Map *map,
+static void full_side_cast(Map *map,
                       const SDL_FPoint *start_point,
                       const FVec2 *advancement,
                       const FVec2 *lookup_displacement,
@@ -100,7 +100,7 @@ void full_side_cast(Map *map,
 
     point_add(&inside_block, lookup_displacement);
 
-    int8_t tile = find_intersecting_wall(map, inside_block);
+    int8_t tile = map_find_intersecting_wall(map, inside_block);
 
     if (tile != 0) {
       result->tile = tile;
@@ -124,7 +124,7 @@ void full_side_cast(Map *map,
   result->result_point = current_point;
 }
 
-void side_cast(Map *map, SDL_FPoint source_point, int is_vertical, float angle,
+void cast_side(Map *map, SDL_FPoint source_point, int is_vertical, float angle,
                SideCastResult *result,
                BoundaryCallback *callback) {
 
@@ -157,7 +157,7 @@ static float point_distance(SDL_FPoint first, SDL_FPoint second) {
 
 }
 
-void find_cast_result(SideCastResult results[2], SDL_FPoint source_point,
+void cast_result_from_sides(SideCastResult results[2], SDL_FPoint source_point,
                              CastResult *output) {
 
   float distances[2];
@@ -175,19 +175,19 @@ void find_cast_result(SideCastResult results[2], SDL_FPoint source_point,
   output->is_vertical = shortest_index == VERTICAL;
 }
 
-void full_cast(Map *map, SDL_FPoint source_point, float angle,
+void cast_full(Map *map, SDL_FPoint source_point, float angle,
                CastResult *output) {
 
   SideCastResult side_cast_results[2];
 
-  side_cast(map, source_point, HORIZONTAL, angle,
+  cast_side(map, source_point, HORIZONTAL, angle,
             &side_cast_results[HORIZONTAL], NULL);
 
-  side_cast(map, source_point, VERTICAL, angle, &side_cast_results[VERTICAL],
+  cast_side(map, source_point, VERTICAL, angle, &side_cast_results[VERTICAL],
             NULL);
 
 
-  find_cast_result(side_cast_results, source_point, output);
+  cast_result_from_sides(side_cast_results, source_point, output);
 
   abort();
 }

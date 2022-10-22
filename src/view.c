@@ -96,7 +96,7 @@ void cast_ray(float initial_x, float initial_y, float angle, Map *map,
       break;
     }
 
-    int8_t tile = find_intersecting_wall(map, point);
+    int8_t tile = map_find_intersecting_wall(map, point);
 
     if (tile > 0) {
       result->tile_value = tile;

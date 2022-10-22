@@ -30,12 +30,12 @@ typedef struct {
 } BoundaryCallback;
 
 
-void side_cast(Map *map, SDL_FPoint source_point, int is_vertical, float angle,
+void cast_side(Map *map, SDL_FPoint source_point, int is_vertical, float angle,
                SideCastResult *result,
                BoundaryCallback *callback);
 
-void full_cast(Map *map, SDL_FPoint source_point, float angle,
+void cast_full(Map *map, SDL_FPoint source_point, float angle,
                CastResult *result);
 
-void find_cast_result(SideCastResult results[2], SDL_FPoint source_point,
+void cast_result_from_sides(SideCastResult results[2], SDL_FPoint source_point,
                              CastResult *output);

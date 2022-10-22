@@ -19,7 +19,7 @@
 static void initialize_textures(Map *map, SDL_Renderer *renderer);
 
 
-struct Map *new_sample_map(SDL_Renderer *renderer) {
+struct Map *map_new_sample(SDL_Renderer *renderer) {
     struct Map *map = malloc(sizeof(*map));
 
     map->rows = 10;
@@ -78,11 +78,11 @@ static void initialize_textures(Map *map, SDL_Renderer *renderer) {
     }
 }
 
-bool point_has_wall(struct Map *map, SDL_FPoint point) {
-    return find_intersecting_wall(map, point) > 0;
+bool map_point_has_wall(struct Map *map, SDL_FPoint point) {
+    return map_find_intersecting_wall(map, point) > 0;
 }
 
-int8_t find_intersecting_wall(struct Map *map, SDL_FPoint point) {
+int8_t map_find_intersecting_wall(struct Map *map, SDL_FPoint point) {
     ssize_t row = (ssize_t) point.y / TILE_SIZE;
     ssize_t col = (ssize_t) point.x / TILE_SIZE;
 
@@ -104,11 +104,11 @@ bool inside_map(struct Map *map, SDL_FPoint point) {
 }
 
 bool point_is_walkable(struct Map *map, SDL_FPoint point) {
-    return inside_map(map, point) && !point_has_wall(map, point);
+    return inside_map(map, point) && !map_point_has_wall(map, point);
 }
 
 
-void free_map(struct Map* map) {
+void map_free(struct Map* map) {
     free(map->tiles);
     free(map);
 }

@@ -10,8 +10,9 @@ typedef struct {
 
 void point_add(SDL_FPoint *p, const FVec2 *vec);
 
+FVec2 point_difference(SDL_FPoint *p, SDL_FPoint *q);
+
 float vec_dot(const FVec2 *u, const FVec2 *v);
 
 float vec_norm(const FVec2 *vec);
 
-FVec2 point_difference(SDL_FPoint *p, SDL_FPoint *q);

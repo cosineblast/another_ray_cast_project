@@ -5,7 +5,7 @@
 #include "player.h"
 #include "map.h"
 
-void render_player_preview(SDL_Renderer *renderer, Player *player, Map *map);
+void preview_render(SDL_Renderer *renderer, Player *player, Map *map);
 
 
 #endif // PREVIEW_H_

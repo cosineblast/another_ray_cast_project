@@ -5,4 +5,4 @@
 #include "map.h"
 #include "player.h"
 
-void render_player_view(SDL_Renderer *renderer, Player *player, Map *map);
+void player_render_view(SDL_Renderer *renderer, Player *player, Map *map);

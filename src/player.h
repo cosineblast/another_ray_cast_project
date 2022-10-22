@@ -12,8 +12,8 @@ typedef struct {
 } Player;
 
 
-void init_sample_player(Player *player);
+void player_init_sample(Player *player);
 
-void render_player(SDL_Renderer *renderer, Player *player, Map *map);
+void player_render(SDL_Renderer *renderer, Player *player, Map *map);
 
-void move_player(SDL_Renderer *renderer, Player *player);
+void player_move(SDL_Renderer *renderer, Player *player);

@@ -31,7 +31,7 @@ static void utilize_side_casts(
   SideCastResult results[2]);
 
 
-void render_player_preview(SDL_Renderer *renderer, Player *player, Map *map) {
+void preview_render(SDL_Renderer *renderer, Player *player, Map *map) {
 
   render_map(renderer, map);
 
@@ -170,7 +170,7 @@ static void render_boundaries(SDL_Renderer *renderer,
 
   BoundaryCallback callback = {on_boundary_callback, renderer};
 
-  side_cast(map,
+  cast_side(map,
             (SDL_FPoint){player->x, player->y},
             is_vertical,
             player->angle,
@@ -204,7 +204,7 @@ static void utilize_side_casts(
 
   CastResult cast_result;
 
-  find_cast_result(side_results,
+  cast_result_from_sides(side_results,
                    (SDL_FPoint){player->x, player->y},
                    &cast_result);
 

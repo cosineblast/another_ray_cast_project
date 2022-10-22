@@ -14,19 +14,19 @@
 #include "vec.h"
 #include "preview.h"
 
-void init_sample_player(Player *player) {
+void player_init_sample(Player *player) {
   player->x = 150;
   player->y = 250;
   player->angle = M_PI_2;
 }
 
-void move_player(SDL_Renderer *renderer, Player *player) {
+void player_move(SDL_Renderer *renderer, Player *player) {
 
     const uint8_t *keyboard_state = SDL_GetKeyboardState(NULL);
 
-    float movement_speed = 600 * time_variation;
+    float movement_speed = 600 * timing_time_variation;
 
-    float angular_speed = 4 * time_variation;
+    float angular_speed = 4 * timing_time_variation;
 
     player->angle += angular_speed * keyboard_state[SDL_SCANCODE_A];
     player->angle -= angular_speed * keyboard_state[SDL_SCANCODE_D];
@@ -43,6 +43,6 @@ void move_player(SDL_Renderer *renderer, Player *player) {
 }
 
 
-void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
-  render_player_preview(renderer, player, map);
+void player_render(SDL_Renderer *renderer, Player *player, Map *map) {
+  preview_render(renderer, player, map);
 }

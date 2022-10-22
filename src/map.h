@@ -14,6 +14,7 @@ struct Map {
     uint8_t *tiles;
 };
 
+
 typedef struct Map Map;
 
 struct Map *new_sample_map();

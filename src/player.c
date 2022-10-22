@@ -4,6 +4,7 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
+#include <stdint.h>
 #include <math.h>
 #include "map.h"
 #include "timing.h"
@@ -130,6 +131,7 @@ void find_horizontal_boundary(
   result->x = x;
   result->y = y;
 
+  boundary_distance->y *= -1;
 }
 
 void find_vertical_boundary(
@@ -159,58 +161,98 @@ void find_vertical_boundary(
 
   result->x = x;
   result->y = y;
+
+  boundary_distance->y *= -1;
 }
 
+typedef struct {
+  SDL_FPoint result_point;
+  SDL_FPoint inside_point;
+  int8_t tile;
+} SideCastResult;
 
+void cast_boundaries(SDL_Renderer *renderer,
+                      Map *map,
+                      const SDL_FPoint *start_point,
+                      const FVec2 *advancement,
+                      const FVec2 *lookup_displacement,
+                      SideCastResult *result
+                      ) {
 
-void render_horizontal_boundaries(SDL_Renderer *renderer, Player *player) {
+  SDL_FPoint current_point = *start_point;
 
-  SDL_FPoint current_point;
-
-  FVec2 boundary_distance;
-
-  find_horizontal_boundary(
-    (SDL_FPoint){player->x, player->y},
-    player->angle, &current_point, &boundary_distance);
+  SDL_FPoint inside_block;
 
   for (;;) {
 
+    inside_block = current_point;
+
+    point_add(&inside_block, lookup_displacement);
+
+    int8_t tile = find_intersecting_wall(map, inside_block);
+
+    if (tile != 0) {
+      result->tile = tile;
+      break;
+    }
+
     if (current_point.x < 0 || current_point.x > SCREEN_WIDTH ||
          current_point.y < 0 || current_point.y > SCREEN_HEIGHT) {
+      result->tile = -1;
       break;
     }
 
     render_dot(renderer, current_point);
 
-    current_point.y -= boundary_distance.y;
-    current_point.x += boundary_distance.x;
+    point_add(&current_point, advancement);
   }
 
+  result->inside_point = inside_block;
+  result->result_point = current_point;
 }
 
-void render_vertical_boundaries(SDL_Renderer *renderer, Player *player) {
+void find_horizontal_displacement(float angle, FVec2 *displacement) {
+  displacement->x = 0;
+  displacement->y = -copysignf(TILE_SIZE/2.0, sinf(angle));
+}
 
-  SDL_FPoint current_point;
+void find_vertical_displacement(float angle, FVec2 *displacement) {
+  displacement->x = copysignf(TILE_SIZE/2.0, cosf(angle));
+  displacement->y = 0;
+}
 
-  FVec2 boundary_distance;
+void render_boundaries(SDL_Renderer *renderer,
+                                  Map *map, Player *player,
+                                  int is_vertical,
+                       SideCastResult *result) {
 
-  find_vertical_boundary(
-    (SDL_FPoint){player->x, player->y},
-    player->angle, &current_point, &boundary_distance);
+  SDL_FPoint start_point;
 
-  for (;;) {
+  FVec2 advancement;
 
-    if (current_point.x < 0 || current_point.x > SCREEN_WIDTH ||
-         current_point.y < 0 || current_point.y > SCREEN_HEIGHT) {
-      break;
-    }
+  FVec2 displacement;
 
-    render_dot(renderer, current_point);
+  if (is_vertical) {
+    find_vertical_boundary((SDL_FPoint){player->x, player->y}, player->angle,
+                            &start_point, &advancement);
 
-    current_point.y -= boundary_distance.y;
-    current_point.x += boundary_distance.x;
+    find_vertical_displacement(player->angle, &displacement);
+  }
+  else {
+    find_horizontal_boundary((SDL_FPoint){player->x, player->y}, player->angle,
+                            &start_point, &advancement);
+
+    find_horizontal_displacement(player->angle, &displacement);
   }
 
+  cast_boundaries(
+    renderer,
+    map,
+    &start_point,
+    &advancement,
+    &displacement,
+    result
+  );
 }
 
 void render_map(SDL_Renderer *renderer, Map *map) {
@@ -239,10 +281,16 @@ void render_map(SDL_Renderer *renderer, Map *map) {
     x = 0;
     y += TILE_SIZE;
   }
-
 }
 
 void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
+
+
+  #if 0
+
+  render_player_view(renderer, player, map);
+
+  #else
 
   render_map(renderer, map);
 
@@ -251,9 +299,21 @@ void render_player(SDL_Renderer *renderer, Player *player, Map *map) {
 
   SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 
-  render_horizontal_boundaries(renderer, player);
+  SideCastResult result;
+
+  render_boundaries(renderer, map, player, 0, &result);
+
+  SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x0, 0xff);
+
+  render_dot(renderer, result.result_point);
 
   SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
 
-  render_vertical_boundaries(renderer, player);
+  render_boundaries(renderer, map, player, 1, &result);
+
+  SDL_SetRenderDrawColor(renderer, 0x0, 0xff, 0xff, 0xff);
+
+  render_dot(renderer, result.result_point);
+
+  #endif
 }

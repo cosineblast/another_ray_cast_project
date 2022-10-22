@@ -33,24 +33,25 @@ void render_player_view(SDL_Renderer *renderer, Player *player, Map *map) {
 
     cast_ray(player->x, player->y, current_angle, map, &result);
 
+    // Fator de correção linear de olho de peixe
     float distance = result.distance * cos(player->angle - current_angle);
 
     float height = SCREEN_HEIGHT * 50 / distance;
 
-    float mid_y = (float)SCREEN_HEIGHT / 2 - height / 2;
+    float middle_y = (float)SCREEN_HEIGHT / 2 - height / 2;
 
-    SDL_FRect rect;
-    rect.x = current_column;
-    rect.y = mid_y;
-    rect.w = 1;
-    rect.h = height;
+    SDL_FRect rectangle;
+    rectangle.x = current_column;
+    rectangle.y = middle_y;
+    rectangle.w = 1;
+    rectangle.h = height;
 
     SDL_Color color;
 
     get_tile_color(result.tile_value, &color);
 
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawRectF(renderer, &rect);
+    SDL_RenderDrawRectF(renderer, &rectangle);
 
 
 

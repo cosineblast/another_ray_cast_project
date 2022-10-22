@@ -8,6 +8,7 @@ typedef struct {
     float y;
 } FVec2;
 
-static SDL_FPoint point_plus(SDL_FPoint p, FVec2 vec) {
-    return (SDL_FPoint){p.x + vec.x, p.y + vec.y};
+static void point_add(SDL_FPoint *p, const FVec2 *vec) {
+    p->x += vec->x;
+    p->y += vec->y;
 }

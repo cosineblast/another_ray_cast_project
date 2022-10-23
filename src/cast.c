@@ -169,6 +169,7 @@ void cast_result_from_sides(SideCastResult results[2], SDL_FPoint source_point,
   output->hit_point = results[shortest_index].result_point;
   output->inside_point = results[shortest_index].inside_point;
   output->is_vertical = shortest_index == VERTICAL;
+  output->tile = results[shortest_index].tile;
 }
 
 void cast_full(Map *map, SDL_FPoint source_point, float angle,
@@ -186,4 +187,28 @@ void cast_full(Map *map, SDL_FPoint source_point, float angle,
   cast_result_from_sides(side_cast_results, source_point, output);
 
   abort();
+}
+
+
+float cast_find_texture_line_offset(CastResult *result, float cast_angle) {
+
+    float sine = sinf(cast_angle);
+    float cosine = cosf(cast_angle);
+
+    if (result->is_vertical) {
+        if (cosine < 0) {
+          return TILE_SIZE - (int) result->hit_point.y % TILE_SIZE;
+        }
+        else {
+          return (int) result->hit_point.y % TILE_SIZE;
+        }
+    }
+    else {
+        if (sine < 0) {
+          return TILE_SIZE - (int) result->hit_point.x % TILE_SIZE;
+        }
+        else {
+          return (int) result->hit_point.x % TILE_SIZE;
+        }
+    }
 }

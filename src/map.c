@@ -122,10 +122,11 @@ SDL_Texture *map_texture_from_tile_value(Map *map, int8_t tile_value) {
         return NULL;
     }
 
+    size_t texture_index = tile_value - 1;
 
-    assert(map->textures[tile_value] != NULL);
+    assert(map->textures[texture_index] != NULL);
 
-    return map->textures[tile_value];
+    return map->textures[texture_index];
 
     return NULL;
 

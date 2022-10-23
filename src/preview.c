@@ -5,6 +5,7 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
+#include <math.h>
 #include "map.h"
 #include "vec.h"
 #include "cast.h"
@@ -197,6 +198,39 @@ static void draw_result_line(
                       cast_result->hit_point.y);
 }
 
+static void render_tile_texture(
+    SDL_Renderer *renderer,
+    SDL_Texture *texture) {
+
+  SDL_Rect source;
+  source.h = TILE_SIZE;
+  source.w = TILE_SIZE;
+  source.x = 0;
+  source.y = 0;
+
+  SDL_FRect destination;
+  destination.h = TILE_SIZE;
+  destination.w = TILE_SIZE;
+  destination.x = 0;
+  destination.y = 0;
+
+  SDL_RenderCopyF(renderer, texture, &source, &destination);
+}
+
+static void render_tile_texture_line(
+    SDL_Renderer *renderer,
+     CastResult *cast_result,
+     Player *player) {
+
+      float offset = cast_find_texture_line_offset(cast_result, player->angle);
+
+      SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
+
+      SDL_RenderDrawLineF(renderer, offset, 0, offset, TILE_SIZE);
+
+}
+
+
 static void utilize_side_casts(
   SDL_Renderer *renderer, Map *map,
   Player *player,
@@ -209,6 +243,15 @@ static void utilize_side_casts(
                    &cast_result);
 
   draw_result_line(renderer, player, &cast_result);
+
+  SDL_Texture *texture = map_texture_from_tile_value(map, cast_result.tile);
+
+  if (texture != NULL) {
+
+      render_tile_texture(renderer, texture);
+
+      render_tile_texture_line(renderer, &cast_result, player);
+}
 
 
 }

@@ -26,7 +26,7 @@ void player_move(SDL_Renderer *renderer, Player *player) {
 
     float movement_speed = 600 * timing_time_variation;
 
-    float angular_speed = 4 * timing_time_variation;
+    float angular_speed = 1 * timing_time_variation;
 
     player->angle += angular_speed * keyboard_state[SDL_SCANCODE_A];
     player->angle -= angular_speed * keyboard_state[SDL_SCANCODE_D];

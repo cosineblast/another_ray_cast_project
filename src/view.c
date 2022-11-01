@@ -1,5 +1,9 @@
 #include "view.h"
+#include "cast.h"
+#include "map.h"
 
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
@@ -12,15 +16,12 @@ typedef struct {
 
 void get_tile_color(int8_t tile, SDL_Color *color);
 
-void cast_ray(float initial_x, float initial_y, float angle, Map *map,
-              RayCastResult *result);
-
 #define FOV 1.04719
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
-void render_player_view(SDL_Renderer *renderer, Player *player, Map *map) {
+void player_render_view(SDL_Renderer *renderer, Player *player, Map *map) {
 
   float current_angle = player->angle + FOV / 2;
 
@@ -29,11 +30,12 @@ void render_player_view(SDL_Renderer *renderer, Player *player, Map *map) {
   for (int current_column = 1; current_column <= SCREEN_WIDTH;
        current_column++) {
 
-    RayCastResult result;
+    CastResult result;
 
-    cast_ray(player->x, player->y, current_angle, map, &result);
+    cast_full(map,
+              (SDL_FPoint){player->x, player->y},
+              current_angle, &result);
 
-    // Fator de correção linear de olho de peixe
     float distance = result.distance * cos(player->angle - current_angle);
 
     float height = SCREEN_HEIGHT * 50 / distance;
@@ -46,12 +48,26 @@ void render_player_view(SDL_Renderer *renderer, Player *player, Map *map) {
     rectangle.w = 1;
     rectangle.h = height;
 
-    SDL_Color color;
+    SDL_Texture *texture = map_texture_from_tile_value(map, result.tile);
 
-    get_tile_color(result.tile_value, &color);
+    if (texture == NULL) {
+      SDL_Color color;
 
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawRectF(renderer, &rectangle);
+      get_tile_color(result.tile, &color);
+
+      SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+      SDL_RenderDrawRectF(renderer, &rectangle);
+    }
+    else {
+        SDL_Rect source;
+        source.x = cast_find_texture_line_offset(&result, current_angle);
+        source.y = 0;
+        source.w = 1;
+        source.h = TILE_SIZE;
+
+        SDL_RenderCopyF(renderer, texture, &source, &rectangle);
+    }
+
 
     current_angle -= angle_increment;
   }
@@ -73,41 +89,3 @@ void get_tile_color(int8_t tile, SDL_Color *color) {
   }
 }
 
-static bool point_in_bounds(float x, float y) {
-  return x >= 0 && x <= SCREEN_WIDTH && y >= 0 && y <= SCREEN_HEIGHT;
-}
-
-void cast_ray(float initial_x, float initial_y, float angle, Map *map,
-              RayCastResult *result) {
-
-  float const increment_unit = 1;
-
-  float const increment_x = increment_unit * cosf(angle);
-  float const increment_y = increment_unit * sinf(angle);
-
-  float total_distance = 0;
-
-  SDL_FPoint point = {initial_x, initial_y};
-
-  for (;;) {
-
-    if (fabsf(point.x) > 1000 || fabs(point.y) > 1000) {
-      result->tile_value = -1;
-      break;
-    }
-
-    int8_t tile = map_find_intersecting_wall(map, point);
-
-    if (tile > 0) {
-      result->tile_value = tile;
-      break;
-    }
-
-    point.x += increment_x;
-    point.y -= increment_y;
-    total_distance += increment_unit;
-  }
-
-  result->touch_point = point;
-  result->distance = total_distance;
-}

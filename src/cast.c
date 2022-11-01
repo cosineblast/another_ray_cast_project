@@ -185,10 +185,7 @@ void cast_full(Map *map, SDL_FPoint source_point, float angle,
 
 
   cast_result_from_sides(side_cast_results, source_point, output);
-
-  abort();
 }
-
 
 float cast_find_texture_line_offset(CastResult *result, float cast_angle) {
 

@@ -44,6 +44,4 @@ void player_move(SDL_Renderer *renderer, Player *player) {
 
 void player_render(SDL_Renderer *renderer, Player *player, Map *map) {
     player_render_view(renderer, player, map);
-
-    // preview_render(renderer, player, map);
 }

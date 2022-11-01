@@ -16,6 +16,33 @@
 #include "player.h"
 #include "timing.h"
 
+void run_main_loop(Map *map, Player *player, SDL_Renderer *renderer) {
+
+    SDL_Event event;
+
+    int running = 1;
+
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            }
+        }
+
+        timing_update_time();
+
+        player_move(renderer, player);
+
+        SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
+
+        SDL_RenderClear(renderer);
+
+        player_render(renderer, player, map);
+
+        SDL_RenderPresent(renderer);
+    }
+}
+
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -33,31 +60,10 @@ int main() {
     Map *map = map_new_sample(renderer);
 
     Player player;
+
     player_init_sample(&player);
 
-    SDL_Event event;
-
-    int running = 1;
-
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = 0;
-            }
-        }
-
-        timing_update_time();
-
-        player_move(renderer, &player);
-
-        SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
-
-        SDL_RenderClear(renderer);
-
-        player_render(renderer, &player, map);
-
-        SDL_RenderPresent(renderer);
-    }
+    run_main_loop(map, &player, renderer);
 
     map_free(map);
 

@@ -9,18 +9,32 @@
 #include "cast.h"
 #include "map.h"
 
-typedef struct {
-    float distance;
-    int8_t tile_value;
-    SDL_FPoint touch_point;
-} RayCastResult;
-
-void get_tile_color(int8_t tile, SDL_Color *color);
-
 #define FOV 1.04719
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
+
+static void get_tile_color(int8_t tile, SDL_Color *color);
+
+// the render_texture_raycast_column and render_colored_raycast_column
+// are both functions that take a rectangle (and quite few other things)
+// and render something on such rectangle on screen based on
+// factors such as the hitting angle and hitting tile
+//
+// we could implement a better system for choosing the rendering function
+// but uh this suffices
+
+// todo: make these arguments into a struct
+
+static void render_texture_raycast_column(Map *map, CastResult *result,
+                                          SDL_FRect *column_rectangle,
+                                          SDL_Renderer *renderer,
+                                          float current_angle);
+
+static void render_colored_raycast_column(Map *map, CastResult *result,
+                                          SDL_FRect *column_rectangle,
+                                          SDL_Renderer *renderer,
+                                          float current_angle);
 
 void player_render_view(SDL_Renderer *renderer, Player *player, Map *map) {
     float current_angle = player->angle + FOV / 2;
@@ -46,31 +60,52 @@ void player_render_view(SDL_Renderer *renderer, Player *player, Map *map) {
         rectangle.w = 1;
         rectangle.h = height;
 
-        SDL_Texture *texture = map_texture_from_tile_value(map, result.tile);
-
-        if (texture == NULL) {
-            SDL_Color color;
-
-            get_tile_color(result.tile, &color);
-
-            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b,
-                                   color.a);
-            SDL_RenderDrawRectF(renderer, &rectangle);
-        } else {
-            SDL_Rect source;
-            source.x = cast_find_texture_line_offset(&result, current_angle);
-            source.y = 0;
-            source.w = 1;
-            source.h = TILE_SIZE;
-
-            SDL_RenderCopyF(renderer, texture, &source, &rectangle);
-        }
+        render_texture_raycast_column(map, &result, &rectangle, renderer,
+                                      current_angle);
 
         current_angle -= angle_increment;
     }
 }
 
-void get_tile_color(int8_t tile, SDL_Color *color) {
+static void render_texture_raycast_column(Map *map, CastResult *result,
+                                          SDL_FRect *column_rectangle,
+                                          SDL_Renderer *renderer,
+                                          float current_angle) {
+    SDL_Texture *texture = map_texture_from_tile_value(map, result->tile);
+
+    if (texture == NULL) {
+        SDL_Color color;
+
+        get_tile_color(result->tile, &color);
+
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+        SDL_RenderDrawRectF(renderer, column_rectangle);
+    } else {
+        SDL_Rect source;
+        source.x = cast_find_texture_line_offset(result, current_angle);
+        source.y = 0;
+        source.w = 1;
+        source.h = TILE_SIZE;
+
+        SDL_RenderCopyF(renderer, texture, &source, column_rectangle);
+    }
+}
+
+static void render_colored_raycast_column(Map *map, CastResult *result,
+                                          SDL_FRect *column_rectangle,
+                                          SDL_Renderer *renderer,
+                                          float current_angle) {
+    SDL_Color rendered_color;
+
+    get_tile_color(result->tile, &rendered_color);
+
+    SDL_SetRenderDrawColor(renderer, rendered_color.r, rendered_color.g,
+                           rendered_color.b, rendered_color.a);
+
+    SDL_RenderFillRectF(renderer, column_rectangle);
+}
+
+static void get_tile_color(int8_t tile, SDL_Color *color) {
     assert(tile != 0);
     assert(tile >= -1);
     assert(tile <= 2);

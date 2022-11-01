@@ -1,84 +1,73 @@
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <math.h>
 
 #include "map.h"
 #include "player.h"
 #include "timing.h"
 
-
-
 int main() {
+    SDL_Init(SDL_INIT_VIDEO);
 
+    IMG_Init(IMG_INIT_PNG);
 
-  SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window *window =
+        SDL_CreateWindow("hi there", SDL_WINDOWPOS_CENTERED,
+                         SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN);
 
-  IMG_Init(IMG_INIT_PNG);
+    SDL_Renderer *renderer = SDL_CreateRenderer(
+        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
+    SDL_ShowWindow(window);
 
-  SDL_Window *window =
-      SDL_CreateWindow("hi there", SDL_WINDOWPOS_CENTERED,
-                       SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN);
+    Map *map = map_new_sample(renderer);
 
-  SDL_Renderer *renderer =
-    SDL_CreateRenderer(window, -1,
-                       SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    Player player;
+    player_init_sample(&player);
 
-  SDL_ShowWindow(window);
+    SDL_Event event;
 
-  Map *map = map_new_sample(renderer);
+    int running = 1;
 
-  Player player;
-  player_init_sample(&player);
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            }
+        }
 
+        timing_update_time();
 
-  SDL_Event event;
+        player_move(renderer, &player);
 
-  int running = 1;
+        SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
 
-  while (running) {
+        SDL_RenderClear(renderer);
 
-    while (SDL_PollEvent(&event)) {
+        player_render(renderer, &player, map);
 
-      if (event.type == SDL_QUIT) {
-        running = 0;
-      }
-
+        SDL_RenderPresent(renderer);
     }
 
-    timing_update_time();
+    map_free(map);
 
-    player_move(renderer, &player);
+    SDL_DestroyRenderer(renderer);
 
-    SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
+    SDL_DestroyWindow(window);
 
-    SDL_RenderClear(renderer);
+    IMG_Quit();
 
-    player_render(renderer, &player, map);
+    SDL_Quit();
 
-    SDL_RenderPresent(renderer);
-  }
-
-  map_free(map);
-
-  SDL_DestroyRenderer(renderer);
-
-  SDL_DestroyWindow(window);
-
-  IMG_Quit();
-
-  SDL_Quit();
-
-  return 0;
+    return 0;
 }

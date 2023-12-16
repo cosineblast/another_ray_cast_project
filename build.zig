@@ -13,7 +13,6 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.addCSourceFiles(&.{
-        "src/player.c",
         "src/view.c",
         "src/preview.c",
         "src/cast.c",

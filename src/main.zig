@@ -2,10 +2,10 @@ const std = @import("std");
 const c = @import("c.zig");
 
 const timing = @import("timing.zig");
-
 const field = @import("map.zig");
+const playerModule = @import("player.zig");
 
-fn run_main_loop(map: *c.Map, player: *c.Player, renderer: ?*c.SDL_Renderer) void {
+fn runMainLoop(map: *c.Map, player: *c.Player, renderer: *c.SDL_Renderer) !void {
     var event: c.SDL_Event = undefined;
 
     var running: bool = true;
@@ -17,15 +17,15 @@ fn run_main_loop(map: *c.Map, player: *c.Player, renderer: ?*c.SDL_Renderer) voi
             }
         }
 
-        timing.update_time();
+        timing.updateTime();
 
-        c.player_move(renderer, player);
+        try playerModule.move(player);
 
         _ = c.SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
 
         _ = c.SDL_RenderClear(renderer);
 
-        c.player_render(renderer, player, map);
+        playerModule.renderPlayer(renderer, player, map);
 
         _ = c.SDL_RenderPresent(renderer);
     }
@@ -53,13 +53,12 @@ pub fn main() !void {
     const map = try field.makeSampleMap(allocator, renderer);
     defer field.deinit(allocator, map);
 
-    var player: c.Player = undefined;
+    var player: c.Player = playerModule.initWithSampleData();
 
-    c.player_init_sample(&player);
-
-    run_main_loop(map, &player, renderer);
+    try runMainLoop(map, &player, renderer);
 }
 
 usingnamespace @import("map.zig");
 usingnamespace @import("timing.zig");
 usingnamespace @import("vec.zig");
+usingnamespace @import("player.zig");

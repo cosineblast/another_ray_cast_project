@@ -1,6 +1,7 @@
 const c = @import("c.zig");
 const std = @import("std");
 
+const view = @import("view.zig");
 const timing = @import("timing.zig");
 
 pub fn initWithSampleData() c.Player {
@@ -27,5 +28,7 @@ pub fn move(player: *c.Player) !void {
 }
 
 pub fn renderPlayer(renderer: *c.SDL_Renderer, player: *c.Player, map: *c.Map) void {
-    c.player_render_view(renderer, player, map);
+    // here we pick if we want renderPlayerView or renderPlayerPreview
+
+    view.renderPlayerView(renderer, player, map);
 }

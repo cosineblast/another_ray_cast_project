@@ -13,7 +13,6 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.addCSourceFiles(&.{
-        "src/view.c",
         "src/preview.c",
         "src/cast.c",
     }, &.{"-Wall"});

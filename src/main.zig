@@ -62,3 +62,4 @@ usingnamespace @import("map.zig");
 usingnamespace @import("timing.zig");
 usingnamespace @import("vec.zig");
 usingnamespace @import("player.zig");
+usingnamespace @import("view.zig");

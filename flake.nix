@@ -12,7 +12,8 @@
       {
         devShells.default =
           pkgs.mkShell {
-            nativeBuildInputs = [
+            buildInputs = [
+              pkgs.pkg-config
               pkgs.SDL2
               pkgs.SDL2.dev
               pkgs.SDL2_image

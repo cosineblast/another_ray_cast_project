@@ -4,6 +4,8 @@
 tmp/
 .direnv
 .envrc
+zig-out
+zig-cache
 
 
 build

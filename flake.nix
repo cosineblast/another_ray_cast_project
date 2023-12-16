@@ -19,6 +19,8 @@
               pkgs.SDL2
               pkgs.SDL2.dev
               pkgs.SDL2_image
+              pkgs.zig
+              pkgs.zls
             ];
           };
       });

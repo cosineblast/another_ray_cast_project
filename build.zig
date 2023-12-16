@@ -1,15 +1,18 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
-    const exe = b.addExecutable(.{
+
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+
+    const exe = b.addExecutable(std.build.ExecutableOptions {
+        .root_source_file = .{ .path = "src/main.zig" },
         .name = "main",
-        .target = b.standardTargetOptions(.{}),
-        .optimize = b.standardOptimizeOption(.{}),
+        .target = target,
+        .optimize = optimize,
     });
 
     exe.addCSourceFiles(&.{
-        "src/main.c",
-        "src/timing.c",
         "src/player.c",
         "src/map.c",
         "src/view.c",
@@ -19,6 +22,7 @@ pub fn build(b: *std.Build) void {
     }, &.{"-Wall"});
 
     exe.linkLibC();
+    exe.addIncludePath(.{ .path = "src" });
     exe.linkSystemLibrary("SDL2");
     exe.linkSystemLibrary("SDL2_image");
 
@@ -32,6 +36,7 @@ pub fn build(b: *std.Build) void {
 
     addRunCommand(b, exe);
 }
+
 
 fn addRunCommand(b: *std.Build, exe: *std.build.Step.Compile) void {
     const run_cmd = b.addRunArtifact(exe);

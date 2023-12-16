@@ -33,3 +33,7 @@ bool map_point_is_walkable(struct Map *map, SDL_FPoint point);
 void map_free(struct Map* map);
 
 SDL_Texture *map_texture_from_tile_value(Map *map, int8_t tile_value);
+
+// TODO: unstatic this
+void initialize_textures(Map *map, SDL_Renderer *renderer);
+

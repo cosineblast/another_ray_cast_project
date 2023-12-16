@@ -15,36 +15,6 @@
 
 #define TEXTURE_COUNT 2
 
-static void initialize_textures(Map *map, SDL_Renderer *renderer);
-
-struct Map *map_new_sample(SDL_Renderer *renderer) {
-    struct Map *map = malloc(sizeof(*map));
-
-    map->rows = 10;
-    map->cols = 10;
-
-    map->tiles = calloc(map->rows * map->cols, sizeof(map->tiles));
-
-    uint8_t sample_map[] = {
-        2, 1, 2, 1, 2, 1, 2, 1, 2, 1,  //
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 2,  //
-        2, 0, 0, 0, 1, 0, 0, 0, 0, 1,  //
-        1, 0, 0, 0, 2, 0, 0, 0, 0, 2,  //
-        2, 0, 0, 0, 1, 0, 0, 0, 0, 1,  //
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 2,  //
-        2, 0, 0, 0, 0, 0, 0, 0, 0, 1,  //
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 2,  //
-        2, 0, 0, 0, 0, 0, 0, 0, 0, 1,  //
-        1, 2, 1, 2, 1, 2, 1, 2, 1, 2,  //
-    };
-
-    memcpy(map->tiles, sample_map, map->rows * map->cols);
-
-    initialize_textures(map, renderer);
-
-    return map;
-}
-
 static SDL_Texture *load_texture(const char *path, SDL_Renderer *renderer) {
     SDL_Surface *surface = IMG_Load(path);
 
@@ -64,7 +34,7 @@ static SDL_Texture *load_texture(const char *path, SDL_Renderer *renderer) {
     return texture;
 }
 
-static void initialize_textures(Map *map, SDL_Renderer *renderer) {
+void initialize_textures(Map *map, SDL_Renderer *renderer) {
     map->textures = malloc(TEXTURE_COUNT * sizeof(SDL_Texture *));
 
     char *paths[] = {TEXTURE_A_PATH, TEXTURE_B_PATH};
@@ -98,11 +68,6 @@ bool inside_map(struct Map *map, SDL_FPoint point) {
 
 bool point_is_walkable(struct Map *map, SDL_FPoint point) {
     return inside_map(map, point) && !map_point_has_wall(map, point);
-}
-
-void map_free(struct Map *map) {
-    free(map->tiles);
-    free(map);
 }
 
 SDL_Texture *map_texture_from_tile_value(Map *map, int8_t tile_value) {

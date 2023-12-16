@@ -5,6 +5,8 @@ const c = @import("c.zig");
 
 const timing  = @import("timing.zig");
 
+const field = @import("map.zig");
+
 fn run_main_loop(map: *c.Map, player: *c.Player, renderer: ?*c.SDL_Renderer) void {
     var event: c.SDL_Event = undefined;
 
@@ -55,8 +57,10 @@ pub fn main() !void {
 
     c.SDL_ShowWindow(window);
 
-    const map = c.map_new_sample(renderer);
-    defer c.map_free(map);
+    const allocator = std.heap.c_allocator;
+
+    const map = try field.make_sample_map(allocator, renderer);
+    defer field.deinit(allocator, map);
 
     var player: c.Player = undefined;
 
@@ -65,4 +69,5 @@ pub fn main() !void {
     run_main_loop(map, &player, renderer);
 }
 
+usingnamespace @import("map.zig");
 usingnamespace @import("timing.zig");

@@ -3,6 +3,8 @@ pub usingnamespace @cImport(
     {
         @cInclude("map.h");
         @cInclude("player.h");
+        @cInclude("vec.h");
+
         @cInclude("SDL2/SDL.h");
         @cInclude("SDL2/SDL_events.h");
         @cInclude("SDL2/SDL_image.h");

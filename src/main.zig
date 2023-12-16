@@ -1,9 +1,7 @@
-
-
 const std = @import("std");
 const c = @import("c.zig");
 
-const timing  = @import("timing.zig");
+const timing = @import("timing.zig");
 
 const field = @import("map.zig");
 
@@ -40,18 +38,11 @@ pub fn main() !void {
     _ = c.IMG_Init(c.IMG_INIT_PNG);
     defer c.IMG_Quit();
 
-    const window = c.SDL_CreateWindow("hi there",
-                                      c.SDL_WINDOWPOS_CENTERED,
-                                      c.SDL_WINDOWPOS_CENTERED,
-                                      640, 480,
-                                      c.SDL_WINDOW_HIDDEN)
-        orelse return error.SDLWindowFailed;
+    const window = c.SDL_CreateWindow("hi there", c.SDL_WINDOWPOS_CENTERED, c.SDL_WINDOWPOS_CENTERED, 640, 480, c.SDL_WINDOW_HIDDEN) orelse return error.SDLWindowFailed;
 
     defer c.SDL_DestroyWindow(window);
 
-    const renderer = c.SDL_CreateRenderer(
-        window, -1, c.SDL_RENDERER_ACCELERATED | c.SDL_RENDERER_PRESENTVSYNC)
-        orelse return error.SDLRendererFailed;
+    const renderer = c.SDL_CreateRenderer(window, -1, c.SDL_RENDERER_ACCELERATED | c.SDL_RENDERER_PRESENTVSYNC) orelse return error.SDLRendererFailed;
 
     defer c.SDL_DestroyRenderer(renderer);
 
@@ -71,3 +62,4 @@ pub fn main() !void {
 
 usingnamespace @import("map.zig");
 usingnamespace @import("timing.zig");
+usingnamespace @import("vec.zig");

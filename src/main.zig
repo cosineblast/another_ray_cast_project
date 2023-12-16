@@ -59,7 +59,7 @@ pub fn main() !void {
 
     const allocator = std.heap.c_allocator;
 
-    const map = try field.make_sample_map(allocator, renderer);
+    const map = try field.makeSampleMap(allocator, renderer);
     defer field.deinit(allocator, map);
 
     var player: c.Player = undefined;

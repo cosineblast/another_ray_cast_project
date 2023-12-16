@@ -20,20 +20,8 @@ struct Map {
 
 typedef struct Map Map;
 
-struct Map *map_new_sample(SDL_Renderer *renderer);
-
 bool map_point_has_wall(struct Map *map, SDL_FPoint point);
 
 int8_t map_find_intersecting_wall(struct Map *map, SDL_FPoint point);
 
-bool map_point_is_inside_map(struct Map *map, SDL_FPoint point);
-
-bool map_point_is_walkable(struct Map *map, SDL_FPoint point);
-
-void map_free(struct Map* map);
-
 SDL_Texture *map_texture_from_tile_value(Map *map, int8_t tile_value);
-
-// TODO: unstatic this
-void initialize_textures(Map *map, SDL_Renderer *renderer);
-

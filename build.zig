@@ -14,7 +14,6 @@ pub fn build(b: *std.Build) void {
 
     exe.addCSourceFiles(&.{
         "src/player.c",
-        "src/map.c",
         "src/view.c",
         "src/vec.c",
         "src/preview.c",

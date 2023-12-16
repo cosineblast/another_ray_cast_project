@@ -13,9 +13,6 @@
         devShells.default =
           pkgs.mkShell {
             nativeBuildInputs = [
-              pkgs.cmake
-              pkgs.clang
-              pkgs.gnumake
               pkgs.SDL2
               pkgs.SDL2.dev
               pkgs.SDL2_image

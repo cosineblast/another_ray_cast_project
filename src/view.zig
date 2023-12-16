@@ -2,49 +2,54 @@ const std = @import("std");
 const assert = std.debug.assert;
 const c = @import("c.zig");
 
-const FOV = 1.04719;
+const USE_TEXTURES = false;
 
+const FOV = 1.04719;
 const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
-// the render_texture_raycast_column and render_colored_raycast_column
-// are both functions that take a rectangle (and quite few other things)
-// and render the player view on such rectangle on screen based on
-// factors such as the hitting angle and hitting tile
-//
-// we could implement a better system for choosing the rendering function
-// but uh this suffices
+const ColumnRenderArguments = struct {
+    map: *c.Map,
+    cast_result: *c.CastResult,
+    column_rectangle: *const c.SDL_FRect,
+    renderer: *c.SDL_Renderer,
+    current_angle: f32
+};
 
-// todo: make these arguments into a struct
+fn renderRaycastColumn(args: *const ColumnRenderArguments) void {
+    if (comptime blk: { break :blk USE_TEXTURES; }) {
+        renderTextureRaycastColumn(args);
+    }
+    else {
+        renderColoredRaycastColumn(args);
+    }
+}
 
-fn renderTextureRaycastColumn(map: *c.Map, result: *c.CastResult, column_rectangle: *const c.SDL_FRect, renderer: *c.SDL_Renderer, current_angle: f32) void {
-    const maybe_texture = c.map_texture_from_tile_value(map, result.tile);
+fn renderTextureRaycastColumn(args: *const ColumnRenderArguments) void {
+    const maybe_texture = c.map_texture_from_tile_value(args.map, args.cast_result.tile);
 
     if (maybe_texture) |texture| {
         const source =
             c.SDL_Rect{
-            .x = @intFromFloat(c.cast_find_texture_line_offset(result, current_angle)),
+            .x = @intFromFloat(c.cast_find_texture_line_offset(args.cast_result, args.current_angle)),
             .y = 0,
             .w = 1,
             .h = c.TILE_SIZE,
         };
 
-        _ = c.SDL_RenderCopyF(renderer, texture, &source, column_rectangle);
+        _ = c.SDL_RenderCopyF(args.renderer, texture, &source, args.column_rectangle);
     } else {
-        c.render_colored_raycast_column(map, result, column_rectangle, renderer, current_angle);
+        renderColoredRaycastColumn(args);
     }
 }
 
-export fn renderColoredRaycastColumn(map: *c.Map, result: *c.CastResult, column_rectangle: *const c.SDL_FRect, renderer: *c.SDL_Renderer, current_angle: f32) void {
-    _ = current_angle;
-    _ = map;
-
+export fn renderColoredRaycastColumn(args: *const ColumnRenderArguments) void {
     var color: c.SDL_Color = undefined;
-    getTileColor(result.tile, &color);
+    getTileColor(args.cast_result.tile, &color);
 
-    _ = c.SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    _ = c.SDL_SetRenderDrawColor(args.renderer, color.r, color.g, color.b, color.a);
 
-    _ = c.SDL_RenderFillRectF(renderer, column_rectangle);
+    _ = c.SDL_RenderFillRectF(args.renderer, args.column_rectangle);
 }
 
 pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *c.Player, map: *c.Map) void {
@@ -71,7 +76,13 @@ pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *c.Player, map: *c.Ma
             .h = height,
         };
 
-        renderColoredRaycastColumn(map, &result, &rectangle, renderer, current_angle);
+        renderRaycastColumn(&ColumnRenderArguments {
+            .map = map,
+            .cast_result = &result,
+            .renderer = renderer,
+            .current_angle = current_angle,
+            .column_rectangle = &rectangle
+        });
 
         current_angle -= angle_increment;
     }

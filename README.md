@@ -19,3 +19,13 @@ cmake --build .
 ```
 
 It will produce an executable called `main`.
+
+## About Nix
+
+If you build this program using the nix `SDL2` and `cmake`,
+you may have to use [`nixGL`](https://github.com/nix-community/nixGL) to run the executable:
+
+```
+nixGL ./main
+```
+

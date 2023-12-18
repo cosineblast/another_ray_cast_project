@@ -3,9 +3,9 @@ const c = @import("c.zig");
 
 const timing = @import("timing.zig");
 const field = @import("map.zig");
-const playerModule = @import("player.zig");
+const Player = @import("player.zig");
 
-fn runMainLoop(map: *c.Map, player: *c.Player, renderer: *c.SDL_Renderer) !void {
+fn runMainLoop(map: *c.Map, player: *Player, renderer: *c.SDL_Renderer) !void {
     var event: c.SDL_Event = undefined;
 
     var running: bool = true;
@@ -19,13 +19,13 @@ fn runMainLoop(map: *c.Map, player: *c.Player, renderer: *c.SDL_Renderer) !void 
 
         timing.updateTime();
 
-        try playerModule.move(player);
+        try player.move();
 
         _ = c.SDL_SetRenderDrawColor(renderer, 0x0d, 0x11, 0x17, 0xff);
 
         _ = c.SDL_RenderClear(renderer);
 
-        playerModule.renderPlayer(renderer, player, map);
+        player.render(renderer, map);
 
         _ = c.SDL_RenderPresent(renderer);
     }
@@ -53,7 +53,7 @@ pub fn main() !void {
     const map = try field.makeSampleMap(allocator, renderer);
     defer field.deinit(allocator, map);
 
-    var player: c.Player = playerModule.initWithSampleData();
+    var player = Player.initWithSampleData();
 
     try runMainLoop(map, &player, renderer);
 }

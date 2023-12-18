@@ -2,7 +2,6 @@
 pub usingnamespace @cImport(
     {
         @cInclude("map.h");
-        @cInclude("player.h");
         @cInclude("vec.h");
         @cInclude("cast.h");
 

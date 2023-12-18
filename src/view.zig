@@ -16,6 +16,8 @@ const ColumnRenderArguments = struct {
     current_angle: f32
 };
 
+const Player = @import("player.zig").Player;
+
 fn renderRaycastColumn(args: *const ColumnRenderArguments) void {
     if (comptime blk: { break :blk USE_TEXTURES; }) {
         renderTextureRaycastColumn(args);
@@ -52,7 +54,7 @@ export fn renderColoredRaycastColumn(args: *const ColumnRenderArguments) void {
     _ = c.SDL_RenderFillRectF(args.renderer, args.column_rectangle);
 }
 
-pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *c.Player, map: *c.Map) void {
+pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     var current_angle = player.angle + FOV / 2.0;
 
     const angle_increment = @as(f32, FOV) / SCREEN_WIDTH;

@@ -6,7 +6,9 @@ const assert = std.debug.assert;
 const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
-pub fn render(renderer: *c.SDL_Renderer, player: *c.Player, map: *c.Map) void {
+const Player = @import("player.zig").Player;
+
+pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     renderMap(renderer, map);
 
     renderGrid(renderer);
@@ -79,7 +81,7 @@ fn renderGrid(renderer: *c.SDL_Renderer) void {
     }
 }
 
-fn renderPlayer2d(renderer: *c.SDL_Renderer, player: *c.Player) void {
+fn renderPlayer2d(renderer: *c.SDL_Renderer, player: *Player) void {
     renderPlayerArrow(renderer, player);
 
     _ = c.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x00, 0xff);
@@ -96,7 +98,7 @@ fn renderPlayer2d(renderer: *c.SDL_Renderer, player: *c.Player) void {
     _ = c.SDL_RenderFillRectF(renderer, &rectangle);
 }
 
-fn renderPlayerArrow(renderer: *c.SDL_Renderer, player: *c.Player) void {
+fn renderPlayerArrow(renderer: *c.SDL_Renderer, player: *Player) void {
     const arrow_size: f32 = 50;
 
     const sine: f32 = std.math.sin(player.angle);
@@ -121,7 +123,7 @@ fn onBoundaryHit(boundary_point: [*c]c.SDL_FPoint, data: ?*anyopaque) callconv(.
     renderDot(renderer, boundary_point.*);
 }
 
-fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *c.Player,
+fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
                               is_vertical: i32, result: *c.SideCastResult) void {
 
     var callback = c.BoundaryCallback {
@@ -151,7 +153,7 @@ fn renderDot(renderer: *c.SDL_Renderer, f: c.SDL_FPoint) void {
 
 
 
-fn drawResultLine(renderer: *c.SDL_Renderer , player: *c.Player,
+fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
                              cast_result: *c.CastResult) void {
     const colors = [2]c.SDL_Color {
         .{ .r = 0xff, .g = 0x88, .b = 0xff, .a = 0xff},
@@ -169,7 +171,7 @@ fn drawResultLine(renderer: *c.SDL_Renderer , player: *c.Player,
                         cast_result.hit_point.x, cast_result.hit_point.y);
 }
 
-fn useSideCasts(renderer: *c.SDL_Renderer, map: *c.Map, player: *c.Player,
+fn useSideCasts(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
                                side_results: [*]c.SideCastResult) void{
 
     var cast_result: c.CastResult = undefined;
@@ -211,7 +213,7 @@ fn renderTileTexture(renderer: *c.SDL_Renderer, texture: *c.SDL_Texture) void {
 
 fn renderTileTextureLine(renderer: *c.SDL_Renderer,
                            cast_result: *c.CastResult,
-                           player: *c.Player) void {
+                           player: *Player) void {
 
     const offset = c.cast_find_texture_line_offset(cast_result, player.angle);
 

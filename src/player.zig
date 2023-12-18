@@ -4,6 +4,8 @@ const std = @import("std");
 const view = @import("view.zig");
 const timing = @import("timing.zig");
 
+const preview = @import("preview.zig");
+
 pub fn initWithSampleData() c.Player {
     return .{ .x = 150, .y = 250, .angle = std.math.pi / 2.0 };
 }
@@ -31,4 +33,5 @@ pub fn renderPlayer(renderer: *c.SDL_Renderer, player: *c.Player, map: *c.Map) v
     // here we pick if we want renderPlayerView or renderPlayerPreview
 
     view.renderPlayerView(renderer, player, map);
+    preview.render(renderer, player, map);
 }

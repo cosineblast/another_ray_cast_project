@@ -12,10 +12,6 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    exe.addCSourceFiles(&.{
-        "src/cast.c",
-    }, &.{"-Wall"});
-
     exe.linkLibC();
     exe.addIncludePath(.{ .path = "src" });
     exe.linkSystemLibrary("SDL2");

@@ -64,3 +64,4 @@ usingnamespace @import("vec.zig");
 usingnamespace @import("player.zig");
 usingnamespace @import("view.zig");
 usingnamespace @import("preview.zig");
+usingnamespace @import("cast.zig");

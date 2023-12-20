@@ -15,3 +15,7 @@ FVec2 point_difference(SDL_FPoint p, SDL_FPoint q);
 float vec_dot(const FVec2 u, const FVec2 v);
 
 float vec_norm(const FVec2 vec);
+
+static float point_distance(SDL_FPoint first, SDL_FPoint second) {
+    return vec_norm(point_difference(first, second));
+}

@@ -5,7 +5,6 @@ pub usingnamespace @cImport(
         @cInclude("vec.h");
         @cInclude("cast.h");
 
-        @cInclude("SDL2/SDL.h");
         @cInclude("SDL2/SDL_events.h");
         @cInclude("SDL2/SDL_image.h");
         @cInclude("SDL2/SDL_keyboard.h");

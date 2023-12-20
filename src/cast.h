@@ -41,3 +41,8 @@ void cast_result_from_sides(SideCastResult results[2], SDL_FPoint source_point,
                              CastResult *output);
 
 float cast_find_texture_line_offset(CastResult *result, float cast_angle);
+
+void full_side_cast(Map *map, const SDL_FPoint start_point,
+                           const FVec2 advancement,
+                           const FVec2 lookup_displacement,
+                           SideCastResult *result, BoundaryCallback *callback);

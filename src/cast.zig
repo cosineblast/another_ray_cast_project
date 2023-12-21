@@ -6,6 +6,9 @@ const SCREEN_HEIGHT = 480;
 
 
 const Map = @import("map.zig");
+const geometry = @import("vec.zig");
+
+const FVec2 = geometry.FVec2;
 
 pub const Axis = enum (u8) {
     Horizontal = 0,
@@ -77,9 +80,9 @@ pub fn performSingleSideCast(map: *Map, source_point: c.SDL_FPoint, axis: Axis, 
                  result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var start_point: c.SDL_FPoint = undefined;
 
-    var advancement: c.FVec2 = undefined;
+    var advancement: FVec2 = undefined;
 
-    var displacement: c.FVec2 = undefined;
+    var displacement: FVec2 = undefined;
 
     if (axis == Axis.Vertical) {
         findVerticalBoundary(source_point, angle, &start_point, &advancement);
@@ -134,21 +137,21 @@ pub fn findTextureLineOffset(result: *CastResult, cast_angle: f32) f32 {
     }
 }
 
-fn findHorizontalDisplacement(angle: f32, displacement: *c.FVec2) void {
+fn findHorizontalDisplacement(angle: f32, displacement: *FVec2) void {
     displacement.x = 0.0;
     displacement.y = -std.math.copysign(@as(f32, @floatFromInt(Map.tile_size)) / 2.0, std.math.sin(angle));
 }
 
-fn findVerticalDisplacement(angle: f32, displacement: *c.FVec2) void {
+fn findVerticalDisplacement(angle: f32, displacement: *FVec2) void {
     displacement.x = std.math.copysign(@as(f32, @floatFromInt(Map.tile_size)) / 2.0, std.math.cos(angle));
     displacement.y = 0.0;
 }
 
 fn pointDistance(first: c.SDL_FPoint , second: c.SDL_FPoint) f32 {
-    return c.vec_norm(c.point_difference(first, second));
+    return geometry.pointDifference(first, second).norm();
 }
 
-fn findHorizontalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, boundary_distance: *c.FVec2) void {
+fn findHorizontalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, boundary_distance: *FVec2) void {
 
     const cotangent = 1.0 / std.math.tan(angle);
     const sine = std.math.sin(angle);
@@ -175,7 +178,7 @@ fn findHorizontalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint
     boundary_distance.y *= -1.0;
 }
 
-fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, boundary_distance: *c.FVec2) void {
+fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, boundary_distance: *FVec2) void {
 
     const tangent = std.math.tan(angle);
     const cosine = std.math.cos(angle);
@@ -203,7 +206,7 @@ fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, 
 }
 
 fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
-                      advancement: c.FVec2, lookup_displacement: c.FVec2,
+                      advancement: FVec2, lookup_displacement: FVec2,
                       result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var current_point: c.SDL_FPoint = start_point;
 
@@ -212,7 +215,7 @@ fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
     while (true) {
         point_inside_block = current_point;
 
-        c.point_add(&point_inside_block, lookup_displacement);
+        geometry.addPoint(&point_inside_block, lookup_displacement);
 
         const tile = map.findWallAtPoint(point_inside_block);
 
@@ -232,7 +235,7 @@ fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
             function(&current_point, callback2.data);
         }
 
-        c.point_add(&current_point, advancement);
+        geometry.addPoint(&current_point, advancement);
     }
 
     result.result_point = current_point;

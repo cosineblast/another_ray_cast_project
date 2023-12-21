@@ -1,8 +1,6 @@
 
 pub usingnamespace @cImport(
     {
-        @cInclude("vec.h");
-
         @cInclude("SDL2/SDL_events.h");
         @cInclude("SDL2/SDL_image.h");
         @cInclude("SDL2/SDL_keyboard.h");

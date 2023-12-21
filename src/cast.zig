@@ -7,7 +7,7 @@ const SCREEN_HEIGHT = 480;
 
 
 const Map = @import("map.zig");
-const geometry = @import("vec.zig");
+const geometry = @import("geometry.zig");
 
 const FPoint = geometry.FPoint;
 const FVec2 = geometry.FVec2;
@@ -150,7 +150,7 @@ fn findVerticalDisplacement(angle: f32, displacement: *FVec2) void {
 }
 
 fn pointDistance(first: FPoint , second: FPoint) f32 {
-    return geometry.pointDifference(first, second).norm();
+    return first.difference(second).norm();
 }
 
 fn findHorizontalBoundary(point: FPoint, angle: f32, result: *FPoint, boundary_distance: *FVec2) void {
@@ -217,7 +217,7 @@ fn runSideCast(map: *Map, start_point: FPoint,
     while (true) {
         point_inside_block = current_point;
 
-        geometry.addPoint(&point_inside_block, lookup_displacement);
+        point_inside_block.plusEqualsVec(lookup_displacement);
 
         const tile = map.findWallAtPoint(point_inside_block);
 
@@ -237,7 +237,7 @@ fn runSideCast(map: *Map, start_point: FPoint,
             function(&current_point, callback2.data);
         }
 
-        geometry.addPoint(&current_point, advancement);
+        current_point.plusEqualsVec(advancement);
     }
 
     result.result_point = current_point;

@@ -2,7 +2,7 @@ const std = @import("std");
 const c = @import("c.zig");
 const assert = std.debug.assert;
 
-const geometry = @import("vec.zig");
+const geometry = @import("geometry.zig");
 const FPoint = geometry.FPoint;
 
 const Allocator = std.mem.Allocator;

@@ -17,7 +17,7 @@ const Axis = casting.Axis;
 const Horizontal = Axis.Horizontal;
 const Vertical = Axis.Vertical;
 
-const geometry = @import("vec.zig");
+const geometry = @import("geometry.zig");
 const FPoint = geometry.FPoint;
 
 const Map = @import("map.zig");

@@ -18,17 +18,17 @@ pub const FVec2 = struct {
 pub const FPoint = struct {
     x: f32,
     y: f32,
+
+    pub fn plusEqualsVec(p: *FPoint, vec: FVec2) void {
+        p.x += vec.x;
+        p.y += vec.y;
+    }
+
+    pub fn difference(p: FPoint, q: FPoint) FVec2 {
+        return .{ .x = q.x - p.x, .y = q.y - p.y };
+    }
+
+    pub fn distance(first: FPoint , second: FPoint) f32 {
+        return first.difference(second).norm();
+    }
 };
-
-pub fn addPoint(p: *FPoint, vec: FVec2) void {
-    p.x += vec.x;
-    p.y += vec.y;
-}
-
-pub fn pointDifference(p: FPoint, q: FPoint) FVec2 {
-    return .{ .x = q.x - p.x, .y = q.y - p.y };
-}
-
-pub fn pointDistance(first: FPoint , second: FPoint) f32 {
-    return pointDifference(first, second).norm();
-}

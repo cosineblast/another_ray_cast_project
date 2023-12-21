@@ -60,7 +60,7 @@ pub fn main() !void {
 
 usingnamespace @import("map.zig");
 usingnamespace @import("timing.zig");
-usingnamespace @import("vec.zig");
+usingnamespace @import("geometry.zig");
 usingnamespace @import("player.zig");
 usingnamespace @import("view.zig");
 usingnamespace @import("preview.zig");

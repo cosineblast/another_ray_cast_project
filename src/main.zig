@@ -4,8 +4,9 @@ const c = @import("c.zig");
 const timing = @import("timing.zig");
 const field = @import("map.zig");
 const Player = @import("player.zig");
+const Map = @import("map.zig");
 
-fn runMainLoop(map: *c.Map, player: *Player, renderer: *c.SDL_Renderer) !void {
+fn runMainLoop(map: *Map, player: *Player, renderer: *c.SDL_Renderer) !void {
     var event: c.SDL_Event = undefined;
 
     var running: bool = true;

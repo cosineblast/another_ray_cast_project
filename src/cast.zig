@@ -6,6 +6,8 @@ const SCREEN_HEIGHT = 480;
 
 const TILE_SIZE: comptime_int = @intCast(c.TILE_SIZE);
 
+const Map = @import("map.zig");
+
 pub const Axis = enum (u8) {
     Horizontal = 0,
     Vertical = 1,
@@ -44,7 +46,7 @@ pub const BoundaryCallback = struct {
 //
 // The resulting travel distance, alongside other information is saved
 // on the fields of `output`. See CastResult for more information.
-pub fn performRayCast(map: *c.Map, source_point: c.SDL_FPoint , angle: f32,
+pub fn performRayCast(map: *Map, source_point: c.SDL_FPoint , angle: f32,
                output: *CastResult) void {
     var side_cast_results: [2]SideCastResult = undefined;
 
@@ -72,7 +74,7 @@ pub fn performRayCast(map: *c.Map, source_point: c.SDL_FPoint , angle: f32,
 //
 // See also: performRayCast
 //
-pub fn performSingleSideCast(map: *c.Map, source_point: c.SDL_FPoint, axis: Axis, angle: f32,
+pub fn performSingleSideCast(map: *Map, source_point: c.SDL_FPoint, axis: Axis, angle: f32,
                  result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var start_point: c.SDL_FPoint = undefined;
 
@@ -201,7 +203,7 @@ fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, 
     boundary_distance.y *= -1.0;
 }
 
-fn runSideCast(map: *c.Map, start_point: c.SDL_FPoint,
+fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
                       advancement: c.FVec2, lookup_displacement: c.FVec2,
                       result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var current_point: c.SDL_FPoint = start_point;
@@ -213,7 +215,7 @@ fn runSideCast(map: *c.Map, start_point: c.SDL_FPoint,
 
         c.point_add(&point_inside_block, lookup_displacement);
 
-        const tile = c.map_find_intersecting_wall(map, point_inside_block);
+        const tile = Map.findIntersectingWall(map, point_inside_block);
 
         if (tile != 0) {
             result.tile = tile;

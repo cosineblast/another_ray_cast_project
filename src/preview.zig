@@ -17,7 +17,9 @@ const Axis = casting.Axis;
 const Horizontal = Axis.Horizontal;
 const Vertical = Axis.Vertical;
 
-pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
+const Map = @import("map.zig");
+
+pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *Map) void {
     renderMap(renderer, map);
 
     renderGrid(renderer);
@@ -44,7 +46,7 @@ pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     useSideCasts(renderer, map, player, results);
 }
 
-fn renderMap(renderer: *c.SDL_Renderer, map: *c.Map)  void {
+fn renderMap(renderer: *c.SDL_Renderer, map: *Map)  void {
 
     var rect = c.SDL_FRect {
         .x = undefined,
@@ -132,7 +134,7 @@ fn onBoundaryHit(boundary_point: *c.SDL_FPoint, data: *anyopaque) callconv(.C) v
     renderDot(renderer, boundary_point.*);
 }
 
-fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
+fn renderBoundaries(renderer: *c.SDL_Renderer, map: *Map, player: *Player,
                               axis: Axis, result: *SideCastResult) void {
 
     var callback = BoundaryCallback {
@@ -178,7 +180,7 @@ fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
                         cast_result.hit_point.x, cast_result.hit_point.y);
 }
 
-fn useSideCasts(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
+fn useSideCasts(renderer: *c.SDL_Renderer, map: *Map, player: *Player,
                                side_results: [2]SideCastResult) void{
 
     var cast_result: CastResult = undefined;
@@ -191,7 +193,7 @@ fn useSideCasts(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
 
     drawResultLine(renderer, player, &cast_result);
 
-    const maybe_texture = c.map_texture_from_tile_value(map, cast_result.tile);
+    const maybe_texture = Map.getTextureFromTileValue(map, cast_result.tile);
 
     if (maybe_texture) |texture| {
         renderTileTexture(renderer, texture);

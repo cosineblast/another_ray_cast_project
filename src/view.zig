@@ -11,8 +11,10 @@ const SCREEN_HEIGHT = 480;
 const casting = @import("cast.zig");
 const CastResult = casting.CastResult;
 
+const Map = @import("map.zig");
+
 const ColumnRenderArguments = struct {
-    map: *c.Map,
+    map: *Map,
     cast_result: *CastResult,
     column_rectangle: *const c.SDL_FRect,
     renderer: *c.SDL_Renderer,
@@ -57,7 +59,7 @@ export fn renderColoredRaycastColumn(args: *const ColumnRenderArguments) void {
     _ = c.SDL_RenderFillRectF(args.renderer, args.column_rectangle);
 }
 
-pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
+pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *Player, map: *Map) void {
     var current_angle = player.angle + FOV / 2.0;
 
     const angle_increment = @as(f32, FOV) / SCREEN_WIDTH;

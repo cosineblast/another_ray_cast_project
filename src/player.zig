@@ -7,6 +7,8 @@ const preview = @import("preview.zig");
 
 pub const Player = @This();
 
+const Map = @import("map.zig");
+
 x: f32,
 y: f32,
 angle: f32,
@@ -30,7 +32,7 @@ pub fn move(player: *Player) !void {
     player.y += angle_sine * movement_speed * @as(f32, @floatFromInt(keyboard_state[c.SDL_SCANCODE_S]));
 }
 
-pub fn render(player: *Player, renderer: *c.SDL_Renderer, map: *c.Map) void {
+pub fn render(player: *Player, renderer: *c.SDL_Renderer, map: *Map) void {
     // here we pick if we want renderPlayerView or renderPlayerPreview
 
     view.renderPlayerView(renderer, player, map);

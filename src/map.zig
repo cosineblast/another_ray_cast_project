@@ -71,7 +71,7 @@ fn loadTexture(path: [*:0]const u8, renderer: *c.SDL_Renderer) !*c.SDL_Texture {
     return texture;
 }
 
-pub fn deinit(alloc: Allocator, map: *Map) void {
+pub fn deinit( map: *Map, alloc: Allocator,) void {
     alloc.free(map.tiles[0..(map.rows * map.cols)]);
     alloc.destroy(map);
 }
@@ -94,7 +94,7 @@ pub fn getTextureFromTileValue(map: *Map, tile_value: i8) ?*c.SDL_Texture {
 }
 
 
-pub fn findIntersectingWall(map: *Map, point: c.SDL_FPoint) i8 {
+pub fn findWallAtPoint(map: *Map, point: c.SDL_FPoint) i8 {
     const row = @divFloor(@as(isize, @intFromFloat(point.y)), @as(isize, tile_size));
     const col = @divFloor(@as(isize, @intFromFloat(point.x)), @as(isize, tile_size));
 

@@ -2,7 +2,6 @@ const std = @import("std");
 const c = @import("c.zig");
 
 const timing = @import("timing.zig");
-const field = @import("map.zig");
 const Player = @import("player.zig");
 const Map = @import("map.zig");
 
@@ -51,8 +50,8 @@ pub fn main() !void {
 
     const allocator = std.heap.c_allocator;
 
-    const map = try field.makeSampleMap(allocator, renderer);
-    defer field.deinit(allocator, map);
+    const map = try Map.makeSampleMap(allocator, renderer);
+    defer map.deinit(allocator);
 
     var player = Player.initWithSampleData();
 

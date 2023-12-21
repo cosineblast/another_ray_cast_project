@@ -193,7 +193,7 @@ fn useSideCasts(renderer: *c.SDL_Renderer, map: *Map, player: *Player,
 
     drawResultLine(renderer, player, &cast_result);
 
-    const maybe_texture = Map.getTextureFromTileValue(map, cast_result.tile);
+    const maybe_texture = map.getTextureFromTileValue(cast_result.tile);
 
     if (maybe_texture) |texture| {
         renderTileTexture(renderer, texture);

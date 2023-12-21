@@ -214,7 +214,7 @@ fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
 
         c.point_add(&point_inside_block, lookup_displacement);
 
-        const tile = Map.findIntersectingWall(map, point_inside_block);
+        const tile = map.findWallAtPoint(point_inside_block);
 
         if (tile != 0) {
             result.tile = tile;

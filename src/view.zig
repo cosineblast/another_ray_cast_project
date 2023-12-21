@@ -2,7 +2,7 @@ const std = @import("std");
 const assert = std.debug.assert;
 const c = @import("c.zig");
 
-const USE_TEXTURES = false;
+const USE_TEXTURES = true;
 
 const FOV = 1.04719;
 const SCREEN_WIDTH = 640;
@@ -33,7 +33,7 @@ fn renderRaycastColumn(args: *const ColumnRenderArguments) void {
 }
 
 fn renderTextureRaycastColumn(args: *const ColumnRenderArguments) void {
-    const maybe_texture = c.map_texture_from_tile_value(args.map, args.cast_result.tile);
+    const maybe_texture = Map.getTextureFromTileValue(args.map, args.cast_result.tile);
 
     if (maybe_texture) |texture| {
         const source =
@@ -50,7 +50,7 @@ fn renderTextureRaycastColumn(args: *const ColumnRenderArguments) void {
     }
 }
 
-export fn renderColoredRaycastColumn(args: *const ColumnRenderArguments) void {
+fn renderColoredRaycastColumn(args: *const ColumnRenderArguments) void {
     var color: c.SDL_Color = undefined;
     getTileColor(args.cast_result.tile, &color);
 

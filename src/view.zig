@@ -98,14 +98,13 @@ pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *Player, map: *Map) v
 const color_mapping =
     [_]c.SDL_Color{ undefined, .{ .r = 0x28, .g = 0x2c, .b = 0x34, .a = 0xff }, .{ .r = 0xf7, .g = 0x81, .b = 0xA9, .a = 0xff } };
 
-export fn getTileColor(tile: i8, color: *c.SDL_Color) void {
+fn getTileColor(tile: ?u8, color: *c.SDL_Color) void {
     assert(tile != 0);
-    assert(tile >= -1);
-    assert(tile <= 2);
 
-    if (tile == -1) {
-        color.* = c.SDL_Color{ .r = 0xff, .g = 0xff, .b = 0xff, .a = 0xff };
+    if (tile) |it| {
+        assert(it <= 2);
+        color.* = color_mapping[it];
     } else {
-        color.* = color_mapping[@intCast(tile)];
+        color.* = c.SDL_Color{ .r = 0xff, .g = 0xff, .b = 0xff, .a = 0xff };
     }
 }

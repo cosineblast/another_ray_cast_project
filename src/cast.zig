@@ -18,7 +18,7 @@ pub const Axis = enum (u8) {
 
 pub const CastResult = struct {
     hit_point: c.SDL_FPoint,
-    tile: i8,
+    tile: ?u8,
     hit_axis: Axis,
     distance: f32,
 };
@@ -26,7 +26,7 @@ pub const CastResult = struct {
 
 pub const SideCastResult = struct {
     result_point: c.SDL_FPoint,
-    tile: i8,
+    tile: ?u8,
 };
 
 pub const BoundaryCallback = struct {
@@ -223,7 +223,7 @@ fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
 
         if (current_point.x < 0 or current_point.x > SCREEN_WIDTH or
             current_point.y < 0 or current_point.y > SCREEN_HEIGHT) {
-            result.tile = -1;
+            result.tile = null;
             break;
         }
 

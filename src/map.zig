@@ -76,17 +76,14 @@ pub fn deinit( map: *Map, alloc: Allocator,) void {
     alloc.destroy(map);
 }
 
-pub fn getTextureFromTileValue(map: *Map, tile_value: i8) ?*c.SDL_Texture {
-    assert(tile_value <= texture_paths.len);
+pub fn getTextureFromTileValue(map: *Map, tile_value_: ?u8) ?*c.SDL_Texture {
+    const tile_value = tile_value_ orelse return null;
 
-    // TODO: cosinder getting rid of -1 value
-    // (or at least, make it ?u8)
-    assert(tile_value >= -1);
-    assert(tile_value <= texture_paths.len);
-
-    if (tile_value <= 0) {
+    if (tile_value == 0) {
         return null;
     }
+
+    assert(tile_value <= texture_paths.len);
 
     const texture_index: usize = @intCast(tile_value - 1);
 
@@ -94,7 +91,7 @@ pub fn getTextureFromTileValue(map: *Map, tile_value: i8) ?*c.SDL_Texture {
 }
 
 
-pub fn findWallAtPoint(map: *Map, point: c.SDL_FPoint) i8 {
+pub fn findWallAtPoint(map: *Map, point: c.SDL_FPoint) ?u8 {
     const row = @divFloor(@as(isize, @intFromFloat(point.y)), @as(isize, tile_size));
     const col = @divFloor(@as(isize, @intFromFloat(point.x)), @as(isize, tile_size));
 
@@ -104,8 +101,8 @@ pub fn findWallAtPoint(map: *Map, point: c.SDL_FPoint) i8 {
         const urow: usize = @intCast(row);
         const ucol: usize = @intCast(col);
 
-        return @intCast(map.tiles[urow * map.cols + ucol]);
+        return map.tiles[urow * map.cols + ucol];
     } else {
-        return -1;
+        return null;
     }
 }

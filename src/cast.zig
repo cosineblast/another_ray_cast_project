@@ -6,12 +6,20 @@ const SCREEN_HEIGHT = 480;
 
 const TILE_SIZE: comptime_int = @intCast(c.TILE_SIZE);
 
+pub const Axis = enum (u8) {
+    Horizontal = 0,
+    Vertical = 1,
+
+    pub fn index(self: Axis) u8 {
+        return @intFromEnum(self);
+    }
+};
 
 pub const CastResult = struct {
     hit_point: c.SDL_FPoint,
     inside_point: c.SDL_FPoint,
     tile: i8,
-    is_vertical: i32,
+    axis: Axis,
     distance: f32,
 };
 
@@ -27,8 +35,6 @@ pub const BoundaryCallback = struct {
     data: *anyopaque,
 };
 
-pub const HORIZONTAL = 0;
-pub const VERTICAL = 1;
 
 
 
@@ -44,10 +50,10 @@ pub fn performRayCast(map: *c.Map, source_point: c.SDL_FPoint , angle: f32,
                output: *CastResult) void {
     var side_cast_results: [2]SideCastResult = undefined;
 
-    performSingleSideCast(map, source_point, HORIZONTAL, angle,
-              &side_cast_results[HORIZONTAL], null);
+    performSingleSideCast(map, source_point, Axis.Horizontal, angle,
+              &side_cast_results[Axis.Horizontal.index()], null);
 
-    performSingleSideCast(map, source_point, VERTICAL, angle, &side_cast_results[VERTICAL],
+    performSingleSideCast(map, source_point, Axis.Vertical, angle, &side_cast_results[Axis.Vertical.index()],
               null);
 
     convertSideResultToCastResult(side_cast_results, source_point, output);
@@ -68,7 +74,7 @@ pub fn performRayCast(map: *c.Map, source_point: c.SDL_FPoint , angle: f32,
 //
 // See also: performRayCast
 //
-pub fn performSingleSideCast(map: *c.Map, source_point: c.SDL_FPoint, is_vertical: i32, angle: f32,
+pub fn performSingleSideCast(map: *c.Map, source_point: c.SDL_FPoint, axis: Axis, angle: f32,
                  result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var start_point: c.SDL_FPoint = undefined;
 
@@ -76,7 +82,7 @@ pub fn performSingleSideCast(map: *c.Map, source_point: c.SDL_FPoint, is_vertica
 
     var displacement: c.FVec2 = undefined;
 
-    if (is_vertical != 0) {
+    if (axis == Axis.Vertical) {
         findVerticalBoundary(source_point, angle, &start_point, &advancement);
 
         findVerticalDisplacement(angle, &displacement);
@@ -96,13 +102,16 @@ pub fn convertSideResultToCastResult(results: [2]SideCastResult, source_point: c
         distances[i] = pointDistance(source_point, results[i].result_point);
     }
 
-    const shortest_index: usize =
-        if (distances[HORIZONTAL] < distances[VERTICAL]) HORIZONTAL else VERTICAL;
+    const shortest_axis: Axis =
+        if (distances[Axis.Horizontal.index()] < distances[Axis.Vertical.index()])
+        Axis.Horizontal else Axis.Vertical;
+
+    const shortest_index  = shortest_axis.index();
 
     output.distance = distances[shortest_index];
     output.hit_point = results[shortest_index].result_point;
     output.inside_point = results[shortest_index].inside_point;
-    output.is_vertical = @intFromBool(shortest_index == VERTICAL);
+    output.axis = shortest_axis;
     output.tile = results[shortest_index].tile;
 }
 
@@ -110,7 +119,7 @@ pub fn findTextureLineOffset(result: *CastResult, cast_angle: f32) f32 {
     const sine = std.math.sin(cast_angle);
     const cosine = std.math.cos(cast_angle);
 
-    if (result.is_vertical != 0) {
+    if (result.axis == Axis.Vertical) {
         const mod = @rem(@as(i32, @intFromFloat(result.hit_point.y)), TILE_SIZE);
         if (cosine < 0.0) {
             return @floatFromInt(TILE_SIZE - mod);

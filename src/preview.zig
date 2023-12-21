@@ -13,8 +13,9 @@ const SideCastResult = casting.SideCastResult;
 const CastResult = casting.CastResult;
 const BoundaryCallback = casting.BoundaryCallback;
 
-const HORIZONTAL = casting.HORIZONTAL;
-const VERTICAL = casting.VERTICAL;
+const Axis = casting.Axis;
+const Horizontal = Axis.Horizontal;
+const Vertical = Axis.Vertical;
 
 pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     renderMap(renderer, map);
@@ -26,16 +27,16 @@ pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     _ = c.SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 
     var results: [2]SideCastResult = undefined;
-    const horizontal_result = &results[HORIZONTAL];
-    const vertical_result = &results[VERTICAL];
+    const horizontal_result = &results[Horizontal.index()];
+    const vertical_result = &results[Vertical.index()];
 
-    renderBoundaries(renderer, map, player, HORIZONTAL, horizontal_result);
+    renderBoundaries(renderer, map, player, Horizontal, horizontal_result);
 
     _= c.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x0, 0xff);
     renderDot(renderer, horizontal_result.result_point);
 
     _ = c.SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
-    renderBoundaries(renderer, map, player, VERTICAL, vertical_result);
+    renderBoundaries(renderer, map, player, Vertical, vertical_result);
 
     _= c.SDL_SetRenderDrawColor(renderer, 0x0, 0xff, 0xff, 0xff);
     renderDot(renderer, vertical_result.result_point);
@@ -132,7 +133,7 @@ fn onBoundaryHit(boundary_point: *c.SDL_FPoint, data: *anyopaque) callconv(.C) v
 }
 
 fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
-                              is_vertical: i32, result: *SideCastResult) void {
+                              axis: Axis, result: *SideCastResult) void {
 
     var callback = BoundaryCallback {
         .@"fn" = onBoundaryHit,
@@ -141,7 +142,7 @@ fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
 
     casting.performSingleSideCast(map,
                 c.SDL_FPoint{.x = player.x, .y = player.y},
-                is_vertical,
+                axis,
                 player.angle, result, &callback);
 }
 
@@ -168,9 +169,7 @@ fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
         .{ .r = 0xff, .g = 0xff, .b = 0x88, .a = 0xff}
     };
 
-    assert(cast_result.is_vertical == 0 or cast_result.is_vertical == 1);
-
-    const line_color = colors[@intCast(cast_result.is_vertical)];
+    const line_color = colors[cast_result.axis.index()];
 
     _ = c.SDL_SetRenderDrawColor(renderer, line_color.r, line_color.g, line_color.b,
                            line_color.a);

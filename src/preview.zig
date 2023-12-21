@@ -7,6 +7,7 @@ const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
 const Player = @import("player.zig").Player;
+const casting = @import("cast.zig");
 
 pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     renderMap(renderer, map);
@@ -32,7 +33,7 @@ pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     _= c.SDL_SetRenderDrawColor(renderer, 0x0, 0xff, 0xff, 0xff);
     renderDot(renderer, vertical_result.result_point);
 
-    useSideCasts(renderer, map, player, &results);
+    useSideCasts(renderer, map, player, results);
 }
 
 fn renderMap(renderer: *c.SDL_Renderer, map: *c.Map)  void {
@@ -131,7 +132,7 @@ fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
         .data = @ptrCast(renderer)
     };
 
-    c.cast_side(map,
+    casting.performSingleSideCast(map,
                 c.SDL_FPoint{.x = player.x, .y = player.y},
                 is_vertical,
                 player.angle, result, &callback);
@@ -172,11 +173,11 @@ fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
 }
 
 fn useSideCasts(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
-                               side_results: [*]c.SideCastResult) void{
+                               side_results: [2]c.SideCastResult) void{
 
     var cast_result: c.CastResult = undefined;
 
-    c.cast_result_from_sides(
+    casting.convertSideResultToCastResult(
         side_results,
         c.SDL_FPoint {.x = player.x, .y = player.y},
         &cast_result
@@ -215,7 +216,7 @@ fn renderTileTextureLine(renderer: *c.SDL_Renderer,
                            cast_result: *c.CastResult,
                            player: *Player) void {
 
-    const offset = c.cast_find_texture_line_offset(cast_result, player.angle);
+    const offset = casting.findTextureLineOffset(cast_result, player.angle);
 
     _ = c.SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 

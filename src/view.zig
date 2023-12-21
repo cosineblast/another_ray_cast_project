@@ -8,6 +8,8 @@ const FOV = 1.04719;
 const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
+const casting = @import("cast.zig");
+
 const ColumnRenderArguments = struct {
     map: *c.Map,
     cast_result: *c.CastResult,
@@ -33,7 +35,7 @@ fn renderTextureRaycastColumn(args: *const ColumnRenderArguments) void {
     if (maybe_texture) |texture| {
         const source =
             c.SDL_Rect{
-            .x = @intFromFloat(c.cast_find_texture_line_offset(args.cast_result, args.current_angle)),
+            .x = @intFromFloat(casting.findTextureLineOffset(args.cast_result, args.current_angle)),
             .y = 0,
             .w = 1,
             .h = c.TILE_SIZE,
@@ -62,7 +64,7 @@ pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map)
     for (1..SCREEN_WIDTH + 1) |current_column| {
         var result: c.CastResult = undefined;
 
-        c.cast_full(map, .{ .x = player.x, .y = player.y }, current_angle, &result);
+        casting.performRayCast(map, .{ .x = player.x, .y = player.y }, current_angle, &result);
 
         const distance = result.distance * std.math.cos(player.angle - current_angle);
 

@@ -7,7 +7,14 @@ const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
 const Player = @import("player.zig").Player;
+
 const casting = @import("cast.zig");
+const SideCastResult = casting.SideCastResult;
+const CastResult = casting.CastResult;
+const BoundaryCallback = casting.BoundaryCallback;
+
+const HORIZONTAL = casting.HORIZONTAL;
+const VERTICAL = casting.VERTICAL;
 
 pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
     renderMap(renderer, map);
@@ -18,17 +25,17 @@ pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map) void {
 
     _ = c.SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 
-    var results: [2]c.SideCastResult = undefined;
-    const horizontal_result = &results[c.HORIZONTAL];
-    const vertical_result = &results[c.VERTICAL];
+    var results: [2]SideCastResult = undefined;
+    const horizontal_result = &results[HORIZONTAL];
+    const vertical_result = &results[VERTICAL];
 
-    renderBoundaries(renderer, map, player, c.HORIZONTAL, horizontal_result);
+    renderBoundaries(renderer, map, player, HORIZONTAL, horizontal_result);
 
     _= c.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x0, 0xff);
     renderDot(renderer, horizontal_result.result_point);
 
     _ = c.SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
-    renderBoundaries(renderer, map, player, c.VERTICAL, vertical_result);
+    renderBoundaries(renderer, map, player, VERTICAL, vertical_result);
 
     _= c.SDL_SetRenderDrawColor(renderer, 0x0, 0xff, 0xff, 0xff);
     renderDot(renderer, vertical_result.result_point);
@@ -118,16 +125,16 @@ fn renderPlayerArrow(renderer: *c.SDL_Renderer, player: *Player) void {
     );
 }
 
-fn onBoundaryHit(boundary_point: [*c]c.SDL_FPoint, data: ?*anyopaque) callconv(.C) void {
+fn onBoundaryHit(boundary_point: *c.SDL_FPoint, data: *anyopaque) callconv(.C) void {
     const renderer: *c.SDL_Renderer = @ptrCast(data);
 
     renderDot(renderer, boundary_point.*);
 }
 
 fn renderBoundaries(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
-                              is_vertical: i32, result: *c.SideCastResult) void {
+                              is_vertical: i32, result: *SideCastResult) void {
 
-    var callback = c.BoundaryCallback {
+    var callback = BoundaryCallback {
         .@"fn" = onBoundaryHit,
         .data = @ptrCast(renderer)
     };
@@ -155,7 +162,7 @@ fn renderDot(renderer: *c.SDL_Renderer, f: c.SDL_FPoint) void {
 
 
 fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
-                             cast_result: *c.CastResult) void {
+                             cast_result: *CastResult) void {
     const colors = [2]c.SDL_Color {
         .{ .r = 0xff, .g = 0x88, .b = 0xff, .a = 0xff},
         .{ .r = 0xff, .g = 0xff, .b = 0x88, .a = 0xff}
@@ -173,9 +180,9 @@ fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
 }
 
 fn useSideCasts(renderer: *c.SDL_Renderer, map: *c.Map, player: *Player,
-                               side_results: [2]c.SideCastResult) void{
+                               side_results: [2]SideCastResult) void{
 
-    var cast_result: c.CastResult = undefined;
+    var cast_result: CastResult = undefined;
 
     casting.convertSideResultToCastResult(
         side_results,
@@ -213,7 +220,7 @@ fn renderTileTexture(renderer: *c.SDL_Renderer, texture: *c.SDL_Texture) void {
 }
 
 fn renderTileTextureLine(renderer: *c.SDL_Renderer,
-                           cast_result: *c.CastResult,
+                           cast_result: *CastResult,
                            player: *Player) void {
 
     const offset = casting.findTextureLineOffset(cast_result, player.angle);

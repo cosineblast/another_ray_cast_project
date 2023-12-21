@@ -9,10 +9,11 @@ const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
 const casting = @import("cast.zig");
+const CastResult = casting.CastResult;
 
 const ColumnRenderArguments = struct {
     map: *c.Map,
-    cast_result: *c.CastResult,
+    cast_result: *CastResult,
     column_rectangle: *const c.SDL_FRect,
     renderer: *c.SDL_Renderer,
     current_angle: f32
@@ -62,7 +63,7 @@ pub fn renderPlayerView(renderer: *c.SDL_Renderer, player: *Player, map: *c.Map)
     const angle_increment = @as(f32, FOV) / SCREEN_WIDTH;
 
     for (1..SCREEN_WIDTH + 1) |current_column| {
-        var result: c.CastResult = undefined;
+        var result: CastResult = undefined;
 
         casting.performRayCast(map, .{ .x = player.x, .y = player.y }, current_angle, &result);
 

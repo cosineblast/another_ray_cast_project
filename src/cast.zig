@@ -6,6 +6,32 @@ const SCREEN_HEIGHT = 480;
 
 const TILE_SIZE: comptime_int = @intCast(c.TILE_SIZE);
 
+
+pub const CastResult = struct {
+    hit_point: c.SDL_FPoint,
+    inside_point: c.SDL_FPoint,
+    tile: i8,
+    is_vertical: i32,
+    distance: f32,
+};
+
+
+pub const SideCastResult = struct {
+    result_point: c.SDL_FPoint,
+    inside_point: c.SDL_FPoint,
+    tile: i8,
+};
+
+pub const BoundaryCallback = struct {
+    @"fn": *const fn(point: *c.SDL_FPoint, data: *anyopaque) callconv(.C) void,
+    data: *anyopaque,
+};
+
+pub const HORIZONTAL = 0;
+pub const VERTICAL = 1;
+
+
+
 // Performs a ray cast computation with the given parameters.
 //
 // This function may answer the following question:
@@ -15,13 +41,13 @@ const TILE_SIZE: comptime_int = @intCast(c.TILE_SIZE);
 // The resulting travel distance, alongside other information is saved
 // on the fields of `output`. See CastResult for more information.
 pub fn performRayCast(map: *c.Map, source_point: c.SDL_FPoint , angle: f32,
-               output: *c.CastResult) void {
-    var side_cast_results: [2]c.SideCastResult = undefined;
+               output: *CastResult) void {
+    var side_cast_results: [2]SideCastResult = undefined;
 
-    performSingleSideCast(map, source_point, c.HORIZONTAL, angle,
-              &side_cast_results[c.HORIZONTAL], null);
+    performSingleSideCast(map, source_point, HORIZONTAL, angle,
+              &side_cast_results[HORIZONTAL], null);
 
-    performSingleSideCast(map, source_point, c.VERTICAL, angle, &side_cast_results[c.VERTICAL],
+    performSingleSideCast(map, source_point, VERTICAL, angle, &side_cast_results[VERTICAL],
               null);
 
     convertSideResultToCastResult(side_cast_results, source_point, output);
@@ -43,7 +69,7 @@ pub fn performRayCast(map: *c.Map, source_point: c.SDL_FPoint , angle: f32,
 // See also: performRayCast
 //
 pub fn performSingleSideCast(map: *c.Map, source_point: c.SDL_FPoint, is_vertical: i32, angle: f32,
-                 result: *c.SideCastResult, callback: ?*c.BoundaryCallback) void {
+                 result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var start_point: c.SDL_FPoint = undefined;
 
     var advancement: c.FVec2 = undefined;
@@ -63,7 +89,7 @@ pub fn performSingleSideCast(map: *c.Map, source_point: c.SDL_FPoint, is_vertica
     runSideCast(map, start_point, advancement, displacement, result, callback);
 }
 
-pub fn convertSideResultToCastResult(results: [2]c.SideCastResult, source_point: c.SDL_FPoint, output: *c.CastResult) void {
+pub fn convertSideResultToCastResult(results: [2]SideCastResult, source_point: c.SDL_FPoint, output: *CastResult) void {
     var distances: [2]f32 = undefined;
 
     for (0..2) |i|  {
@@ -71,16 +97,16 @@ pub fn convertSideResultToCastResult(results: [2]c.SideCastResult, source_point:
     }
 
     const shortest_index: usize =
-        if (distances[c.HORIZONTAL] < distances[c.VERTICAL]) c.HORIZONTAL else c.VERTICAL;
+        if (distances[HORIZONTAL] < distances[VERTICAL]) HORIZONTAL else VERTICAL;
 
     output.distance = distances[shortest_index];
     output.hit_point = results[shortest_index].result_point;
     output.inside_point = results[shortest_index].inside_point;
-    output.is_vertical = @intFromBool(shortest_index == c.VERTICAL);
+    output.is_vertical = @intFromBool(shortest_index == VERTICAL);
     output.tile = results[shortest_index].tile;
 }
 
-pub fn findTextureLineOffset(result: *c.CastResult, cast_angle: f32) f32 {
+pub fn findTextureLineOffset(result: *CastResult, cast_angle: f32) f32 {
     const sine = std.math.sin(cast_angle);
     const cosine = std.math.cos(cast_angle);
 
@@ -171,7 +197,7 @@ fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, 
 
 fn runSideCast(map: *c.Map, start_point: c.SDL_FPoint,
                       advancement: c.FVec2, lookup_displacement: c.FVec2,
-                      result: *c.SideCastResult, callback: ?*c.BoundaryCallback) void {
+                      result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var current_point: c.SDL_FPoint = start_point;
 
     var inside_block: c.SDL_FPoint = undefined;
@@ -195,9 +221,8 @@ fn runSideCast(map: *c.Map, start_point: c.SDL_FPoint,
         }
 
         if (callback) |callback2| {
-            if (callback2.@"fn") |function| {
-                function(&current_point, callback2.data);
-            }
+            const function = callback2.@"fn";
+            function(&current_point, callback2.data);
         }
 
         c.point_add(&current_point, advancement);

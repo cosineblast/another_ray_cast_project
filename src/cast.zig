@@ -17,16 +17,14 @@ pub const Axis = enum (u8) {
 
 pub const CastResult = struct {
     hit_point: c.SDL_FPoint,
-    inside_point: c.SDL_FPoint,
     tile: i8,
-    axis: Axis,
+    hit_axis: Axis,
     distance: f32,
 };
 
 
 pub const SideCastResult = struct {
     result_point: c.SDL_FPoint,
-    inside_point: c.SDL_FPoint,
     tile: i8,
 };
 
@@ -110,8 +108,7 @@ pub fn convertSideResultToCastResult(results: [2]SideCastResult, source_point: c
 
     output.distance = distances[shortest_index];
     output.hit_point = results[shortest_index].result_point;
-    output.inside_point = results[shortest_index].inside_point;
-    output.axis = shortest_axis;
+    output.hit_axis = shortest_axis;
     output.tile = results[shortest_index].tile;
 }
 
@@ -119,7 +116,7 @@ pub fn findTextureLineOffset(result: *CastResult, cast_angle: f32) f32 {
     const sine = std.math.sin(cast_angle);
     const cosine = std.math.cos(cast_angle);
 
-    if (result.axis == Axis.Vertical) {
+    if (result.hit_axis == Axis.Vertical) {
         const mod = @rem(@as(i32, @intFromFloat(result.hit_point.y)), TILE_SIZE);
         if (cosine < 0.0) {
             return @floatFromInt(TILE_SIZE - mod);
@@ -209,14 +206,14 @@ fn runSideCast(map: *c.Map, start_point: c.SDL_FPoint,
                       result: *SideCastResult, callback: ?*BoundaryCallback) void {
     var current_point: c.SDL_FPoint = start_point;
 
-    var inside_block: c.SDL_FPoint = undefined;
+    var point_inside_block: c.SDL_FPoint = undefined;
 
     while (true) {
-        inside_block = current_point;
+        point_inside_block = current_point;
 
-        c.point_add(&inside_block, lookup_displacement);
+        c.point_add(&point_inside_block, lookup_displacement);
 
-        const tile = c.map_find_intersecting_wall(map, inside_block);
+        const tile = c.map_find_intersecting_wall(map, point_inside_block);
 
         if (tile != 0) {
             result.tile = tile;
@@ -237,7 +234,6 @@ fn runSideCast(map: *c.Map, start_point: c.SDL_FPoint,
         c.point_add(&current_point, advancement);
     }
 
-    result.inside_point = inside_block;
     result.result_point = current_point;
 }
 

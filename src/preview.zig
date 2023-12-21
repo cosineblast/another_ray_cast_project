@@ -169,7 +169,7 @@ fn drawResultLine(renderer: *c.SDL_Renderer , player: *Player,
         .{ .r = 0xff, .g = 0xff, .b = 0x88, .a = 0xff}
     };
 
-    const line_color = colors[cast_result.axis.index()];
+    const line_color = colors[cast_result.hit_axis.index()];
 
     _ = c.SDL_SetRenderDrawColor(renderer, line_color.r, line_color.g, line_color.b,
                            line_color.a);

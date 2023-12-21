@@ -1,6 +1,7 @@
 const c = @import("c.zig");
 const std = @import("std");
 
+
 const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
@@ -8,6 +9,7 @@ const SCREEN_HEIGHT = 480;
 const Map = @import("map.zig");
 const geometry = @import("vec.zig");
 
+const FPoint = geometry.FPoint;
 const FVec2 = geometry.FVec2;
 
 pub const Axis = enum (u8) {
@@ -20,7 +22,7 @@ pub const Axis = enum (u8) {
 };
 
 pub const CastResult = struct {
-    hit_point: c.SDL_FPoint,
+    hit_point: FPoint,
     tile: ?u8,
     hit_axis: Axis,
     distance: f32,
@@ -28,12 +30,12 @@ pub const CastResult = struct {
 
 
 pub const SideCastResult = struct {
-    result_point: c.SDL_FPoint,
+    result_point: FPoint,
     tile: ?u8,
 };
 
 pub const BoundaryCallback = struct {
-    @"fn": *const fn(point: *c.SDL_FPoint, data: *anyopaque) callconv(.C) void,
+    @"fn": *const fn(point: *FPoint, data: *anyopaque) callconv(.C) void,
     data: *anyopaque,
 };
 
@@ -48,7 +50,7 @@ pub const BoundaryCallback = struct {
 //
 // The resulting travel distance, alongside other information is saved
 // on the fields of `output`. See CastResult for more information.
-pub fn performRayCast(map: *Map, source_point: c.SDL_FPoint , angle: f32,
+pub fn performRayCast(map: *Map, source_point: FPoint , angle: f32,
                output: *CastResult) void {
     var side_cast_results: [2]SideCastResult = undefined;
 
@@ -76,9 +78,9 @@ pub fn performRayCast(map: *Map, source_point: c.SDL_FPoint , angle: f32,
 //
 // See also: performRayCast
 //
-pub fn performSingleSideCast(map: *Map, source_point: c.SDL_FPoint, axis: Axis, angle: f32,
+pub fn performSingleSideCast(map: *Map, source_point: FPoint, axis: Axis, angle: f32,
                  result: *SideCastResult, callback: ?*BoundaryCallback) void {
-    var start_point: c.SDL_FPoint = undefined;
+    var start_point: FPoint = undefined;
 
     var advancement: FVec2 = undefined;
 
@@ -97,7 +99,7 @@ pub fn performSingleSideCast(map: *Map, source_point: c.SDL_FPoint, axis: Axis, 
     runSideCast(map, start_point, advancement, displacement, result, callback);
 }
 
-pub fn convertSideResultToCastResult(results: [2]SideCastResult, source_point: c.SDL_FPoint, output: *CastResult) void {
+pub fn convertSideResultToCastResult(results: [2]SideCastResult, source_point: FPoint, output: *CastResult) void {
     var distances: [2]f32 = undefined;
 
     for (0..2) |i|  {
@@ -147,11 +149,11 @@ fn findVerticalDisplacement(angle: f32, displacement: *FVec2) void {
     displacement.y = 0.0;
 }
 
-fn pointDistance(first: c.SDL_FPoint , second: c.SDL_FPoint) f32 {
+fn pointDistance(first: FPoint , second: FPoint) f32 {
     return geometry.pointDifference(first, second).norm();
 }
 
-fn findHorizontalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, boundary_distance: *FVec2) void {
+fn findHorizontalBoundary(point: FPoint, angle: f32, result: *FPoint, boundary_distance: *FVec2) void {
 
     const cotangent = 1.0 / std.math.tan(angle);
     const sine = std.math.sin(angle);
@@ -178,7 +180,7 @@ fn findHorizontalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint
     boundary_distance.y *= -1.0;
 }
 
-fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, boundary_distance: *FVec2) void {
+fn findVerticalBoundary(point: FPoint, angle: f32, result: *FPoint, boundary_distance: *FVec2) void {
 
     const tangent = std.math.tan(angle);
     const cosine = std.math.cos(angle);
@@ -205,12 +207,12 @@ fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, 
     boundary_distance.y *= -1.0;
 }
 
-fn runSideCast(map: *Map, start_point: c.SDL_FPoint,
+fn runSideCast(map: *Map, start_point: FPoint,
                       advancement: FVec2, lookup_displacement: FVec2,
                       result: *SideCastResult, callback: ?*BoundaryCallback) void {
-    var current_point: c.SDL_FPoint = start_point;
+    var current_point: FPoint = start_point;
 
-    var point_inside_block: c.SDL_FPoint = undefined;
+    var point_inside_block: FPoint = undefined;
 
     while (true) {
         point_inside_block = current_point;

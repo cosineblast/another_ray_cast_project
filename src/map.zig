@@ -2,6 +2,9 @@ const std = @import("std");
 const c = @import("c.zig");
 const assert = std.debug.assert;
 
+const geometry = @import("vec.zig");
+const FPoint = geometry.FPoint;
+
 const Allocator = std.mem.Allocator;
 
 rows: usize,
@@ -91,7 +94,7 @@ pub fn getTextureFromTileValue(map: *Map, tile_value_: ?u8) ?*c.SDL_Texture {
 }
 
 
-pub fn findWallAtPoint(map: *Map, point: c.SDL_FPoint) ?u8 {
+pub fn findWallAtPoint(map: *Map, point: FPoint) ?u8 {
     const row = @divFloor(@as(isize, @intFromFloat(point.y)), @as(isize, tile_size));
     const col = @divFloor(@as(isize, @intFromFloat(point.x)), @as(isize, tile_size));
 

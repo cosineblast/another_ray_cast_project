@@ -17,6 +17,9 @@ const Axis = casting.Axis;
 const Horizontal = Axis.Horizontal;
 const Vertical = Axis.Vertical;
 
+const geometry = @import("vec.zig");
+const FPoint = geometry.FPoint;
+
 const Map = @import("map.zig");
 
 pub fn render(renderer: *c.SDL_Renderer, player: *Player, map: *Map) void {
@@ -128,7 +131,7 @@ fn renderPlayerArrow(renderer: *c.SDL_Renderer, player: *Player) void {
     );
 }
 
-fn onBoundaryHit(boundary_point: *c.SDL_FPoint, data: *anyopaque) callconv(.C) void {
+fn onBoundaryHit(boundary_point: *FPoint, data: *anyopaque) callconv(.C) void {
     const renderer: *c.SDL_Renderer = @ptrCast(data);
 
     renderDot(renderer, boundary_point.*);
@@ -143,12 +146,12 @@ fn renderBoundaries(renderer: *c.SDL_Renderer, map: *Map, player: *Player,
     };
 
     casting.performSingleSideCast(map,
-                c.SDL_FPoint{.x = player.x, .y = player.y},
+                FPoint{.x = player.x, .y = player.y},
                 axis,
                 player.angle, result, &callback);
 }
 
-fn renderDot(renderer: *c.SDL_Renderer, f: c.SDL_FPoint) void {
+fn renderDot(renderer: *c.SDL_Renderer, f: FPoint) void {
     const width = 5.0;
     const height = 5.0;
 
@@ -187,7 +190,7 @@ fn useSideCasts(renderer: *c.SDL_Renderer, map: *Map, player: *Player,
 
     casting.convertSideResultToCastResult(
         side_results,
-        c.SDL_FPoint {.x = player.x, .y = player.y},
+        FPoint {.x = player.x, .y = player.y},
         &cast_result
     );
 

@@ -15,15 +15,20 @@ pub const FVec2 = struct {
     }
 };
 
-pub fn addPoint(p: *c.SDL_FPoint, vec: FVec2) void {
+pub const FPoint = struct {
+    x: f32,
+    y: f32,
+};
+
+pub fn addPoint(p: *FPoint, vec: FVec2) void {
     p.x += vec.x;
     p.y += vec.y;
 }
 
-pub fn pointDifference(p: c.SDL_FPoint, q: c.SDL_FPoint) FVec2 {
+pub fn pointDifference(p: FPoint, q: FPoint) FVec2 {
     return .{ .x = q.x - p.x, .y = q.y - p.y };
 }
 
-pub fn pointDistance(first: c.SDL_FPoint , second: c.SDL_FPoint) f32 {
+pub fn pointDistance(first: FPoint , second: FPoint) f32 {
     return pointDifference(first, second).norm();
 }

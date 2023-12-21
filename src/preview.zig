@@ -51,8 +51,8 @@ fn renderMap(renderer: *c.SDL_Renderer, map: *Map)  void {
     var rect = c.SDL_FRect {
         .x = undefined,
         .y = undefined,
-        .w = c.TILE_SIZE,
-        .h = c.TILE_SIZE };
+        .w = Map.tile_size,
+        .h = Map.tile_size };
 
     var y: i32 = 0;
     for (0..SCREEN_HEIGHT) |row| {
@@ -70,10 +70,10 @@ fn renderMap(renderer: *c.SDL_Renderer, map: *Map)  void {
                 _ = c.SDL_RenderFillRectF(renderer, &rect);
             }
 
-            x += c.TILE_SIZE;
+            x += Map.tile_size;
         }
         x = 0;
-        y += c.TILE_SIZE;
+        y += Map.tile_size;
     }
 }
 
@@ -82,12 +82,12 @@ fn renderGrid(renderer: *c.SDL_Renderer) void {
     _ = c.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0x00, 0xff);
 
     var y: i32 = 0;
-    while (y < SCREEN_HEIGHT) : (y += c.TILE_SIZE) {
+    while (y < SCREEN_HEIGHT) : (y += Map.tile_size) {
 
         var x: i32 = 0;
-        while (x < SCREEN_WIDTH) : (x += c.TILE_SIZE) {
-            _ = c.SDL_RenderDrawLine(renderer, x, y, x + c.TILE_SIZE, y);
-            _ = c.SDL_RenderDrawLine(renderer, x, y, x, y + c.TILE_SIZE);
+        while (x < SCREEN_WIDTH) : (x += Map.tile_size) {
+            _ = c.SDL_RenderDrawLine(renderer, x, y, x + Map.tile_size, y);
+            _ = c.SDL_RenderDrawLine(renderer, x, y, x, y + Map.tile_size);
         }
     }
 }
@@ -204,15 +204,15 @@ fn useSideCasts(renderer: *c.SDL_Renderer, map: *Map, player: *Player,
 
 fn renderTileTexture(renderer: *c.SDL_Renderer, texture: *c.SDL_Texture) void {
     var source  = c.SDL_Rect {
-        .h = c.TILE_SIZE,
-        .w = c.TILE_SIZE,
+        .h = Map.tile_size,
+        .w = Map.tile_size,
         .x = 0,
         .y = 0,
     };
 
     var destination = c.SDL_FRect {
-        .h = c.TILE_SIZE,
-        .w = c.TILE_SIZE,
+        .h = Map.tile_size,
+        .w = Map.tile_size,
         .x = 0,
         .y = 0,
     };
@@ -228,5 +228,5 @@ fn renderTileTextureLine(renderer: *c.SDL_Renderer,
 
     _ = c.SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
 
-    _ = c.SDL_RenderDrawLineF(renderer, offset, 0, offset, c.TILE_SIZE);
+    _ = c.SDL_RenderDrawLineF(renderer, offset, 0, offset, Map.tile_size);
 }

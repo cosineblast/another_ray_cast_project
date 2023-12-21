@@ -41,7 +41,7 @@ fn renderTextureRaycastColumn(args: *const ColumnRenderArguments) void {
             .x = @intFromFloat(casting.findTextureLineOffset(args.cast_result, args.current_angle)),
             .y = 0,
             .w = 1,
-            .h = c.TILE_SIZE,
+            .h = Map.tile_size,
         };
 
         _ = c.SDL_RenderCopyF(args.renderer, texture, &source, args.column_rectangle);

@@ -4,7 +4,6 @@ const std = @import("std");
 const SCREEN_WIDTH = 640;
 const SCREEN_HEIGHT = 480;
 
-const TILE_SIZE: comptime_int = @intCast(c.TILE_SIZE);
 
 const Map = @import("map.zig");
 
@@ -119,16 +118,16 @@ pub fn findTextureLineOffset(result: *CastResult, cast_angle: f32) f32 {
     const cosine = std.math.cos(cast_angle);
 
     if (result.hit_axis == Axis.Vertical) {
-        const mod = @rem(@as(i32, @intFromFloat(result.hit_point.y)), TILE_SIZE);
+        const mod = @rem(@as(i32, @intFromFloat(result.hit_point.y)), Map.tile_size);
         if (cosine < 0.0) {
-            return @floatFromInt(TILE_SIZE - mod);
+            return @floatFromInt(Map.tile_size - mod);
         } else {
             return @floatFromInt(mod);
         }
     } else {
-        const mod = @rem(@as(i32, @intFromFloat(result.hit_point.x)), TILE_SIZE);
+        const mod = @rem(@as(i32, @intFromFloat(result.hit_point.x)), Map.tile_size);
         if (sine < 0.0) {
-            return @floatFromInt(TILE_SIZE - mod);
+            return @floatFromInt(Map.tile_size - mod);
         } else {
             return @floatFromInt(mod);
         }
@@ -137,11 +136,11 @@ pub fn findTextureLineOffset(result: *CastResult, cast_angle: f32) f32 {
 
 fn findHorizontalDisplacement(angle: f32, displacement: *c.FVec2) void {
     displacement.x = 0.0;
-    displacement.y = -std.math.copysign(@as(f32, @floatFromInt(TILE_SIZE)) / 2.0, std.math.sin(angle));
+    displacement.y = -std.math.copysign(@as(f32, @floatFromInt(Map.tile_size)) / 2.0, std.math.sin(angle));
 }
 
 fn findVerticalDisplacement(angle: f32, displacement: *c.FVec2) void {
-    displacement.x = std.math.copysign(@as(f32, @floatFromInt(TILE_SIZE)) / 2.0, std.math.cos(angle));
+    displacement.x = std.math.copysign(@as(f32, @floatFromInt(Map.tile_size)) / 2.0, std.math.cos(angle));
     displacement.y = 0.0;
 }
 
@@ -154,7 +153,7 @@ fn findHorizontalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint
     const cotangent = 1.0 / std.math.tan(angle);
     const sine = std.math.sin(angle);
 
-    boundary_distance.y = std.math.copysign(@as(f32, TILE_SIZE), sine);
+    boundary_distance.y = std.math.copysign(@as(f32, Map.tile_size), sine);
     boundary_distance.x = boundary_distance.y * cotangent;
 
     const height: f32 = @floatFromInt(@rem(@as(i32, @intFromFloat(point.y)), 64));
@@ -181,7 +180,7 @@ fn findVerticalBoundary(point: c.SDL_FPoint, angle: f32, result: *c.SDL_FPoint, 
     const tangent = std.math.tan(angle);
     const cosine = std.math.cos(angle);
 
-    boundary_distance.x = std.math.copysign(@as(f32, TILE_SIZE), cosine);
+    boundary_distance.x = std.math.copysign(@as(f32, Map.tile_size), cosine);
     boundary_distance.y = boundary_distance.x * tangent;
 
     const width: f32 = @floatFromInt(@rem(@as(i32, @intFromFloat(point.x)), 64));

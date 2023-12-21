@@ -1,7 +1,6 @@
 
 pub usingnamespace @cImport(
     {
-        @cInclude("map.h");
         @cInclude("vec.h");
 
         @cInclude("SDL2/SDL_events.h");
